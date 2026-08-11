@@ -134,5 +134,87 @@ def add_medicine():
     return redirect("/medicines")
 
 
+# =========================
+# INVENTORY
+# =========================
+
+@app.route("/inventory")
+def inventory():
+
+    connection = get_database_connection()
+
+    inventory_items = connection.execute("""
+        SELECT
+            inventory.id,
+            hospitals.name AS hospital_name,
+            medicines.name AS medicine_name,
+            inventory.stock_quantity,
+            inventory.minimum_stock,
+            inventory.expiry_date
+        FROM inventory
+        JOIN hospitals
+            ON inventory.hospital_id = hospitals.id
+        JOIN medicines
+            ON inventory.medicine_id = medicines.id
+        ORDER BY inventory.id
+    """).fetchall()
+
+    hospitals = connection.execute(
+        "SELECT * FROM hospitals ORDER BY name"
+    ).fetchall()
+
+    medicines = connection.execute(
+        "SELECT * FROM medicines ORDER BY name"
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "inventory.html",
+        inventory_items=inventory_items,
+        hospitals=hospitals,
+        medicines=medicines
+    )
+
+
+# =========================
+# ADD INVENTORY
+# =========================
+
+@app.route("/add-inventory", methods=["POST"])
+def add_inventory():
+
+    hospital_id = request.form["hospital_id"]
+    medicine_id = request.form["medicine_id"]
+    stock_quantity = request.form["stock_quantity"]
+    minimum_stock = request.form["minimum_stock"]
+    expiry_date = request.form["expiry_date"]
+
+    connection = get_database_connection()
+
+    connection.execute("""
+        INSERT INTO inventory
+        (
+            hospital_id,
+            medicine_id,
+            stock_quantity,
+            minimum_stock,
+            expiry_date
+        )
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        hospital_id,
+        medicine_id,
+        stock_quantity,
+        minimum_stock,
+        expiry_date
+    ))
+
+    connection.commit()
+    connection.close()
+
+    return redirect("/inventory")
+
+
 if __name__ == "__main__":
     app.run(debug=True)

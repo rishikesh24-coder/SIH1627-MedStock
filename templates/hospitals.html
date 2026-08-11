@@ -1,221 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Hospitals - MedStock</title>
 
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fb;
-            color: #1f2937;
-        }
-
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-
-        .sidebar {
-            width: 240px;
-            background-color: #0f172a;
-            color: white;
-            padding: 25px 15px;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 35px;
-        }
-
-        .menu {
-            list-style: none;
-        }
-
-        .menu li {
-            padding: 14px 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-        }
-
-        .menu a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .menu li:hover {
-            background-color: #1e293b;
-        }
-
-        /* Main */
-
-        .main {
-            flex: 1;
-            padding: 30px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 30px;
-        }
-
-        .add-button {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        .add-button:hover {
-            background-color: #1d4ed8;
-        }
-
-        /* Form */
-
-        .form-box {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .form-box h2 {
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 7px;
-        }
-
-        .submit-button {
-            background-color: #16a34a;
-            color: white;
-            border: none;
-            padding: 11px 20px;
-            border-radius: 7px;
-            cursor: pointer;
-        }
-
-        /* Table */
-
-        .table-box {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            background-color: #f8fafc;
-        }
-
-        .status {
-            color: #15803d;
-            font-weight: bold;
-        }
-
-    </style>
-
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 
 <body>
 
-<div class="container">
+    <!-- NAVBAR -->
 
-    <!-- Sidebar -->
-
-    <aside class="sidebar">
+    <nav class="navbar">
 
         <div class="logo">
             💊 MedStock
         </div>
 
-        <ul class="menu">
+        <div class="nav-links">
 
-            <li>
-                <a href="/">📊 Dashboard</a>
-            </li>
+            <a href="{{ url_for('dashboard') }}">
+                Dashboard
+            </a>
 
-            <li>
-                <a href="/hospitals">🏥 Hospitals</a>
-            </li>
+            <a href="{{ url_for('hospitals_page') }}">
+                Hospitals
+            </a>
 
-            <li>💊 Medicines</li>
+            <a href="{{ url_for('medicines_page') }}">
+                Medicines
+            </a>
 
-            <li>📋 Requirements</li>
+            <a href="{{ url_for('inventory_page') }}">
+                Inventory
+            </a>
 
-            <li>🔄 Transfers</li>
+            <a href="{{ url_for('requirements_page') }}">
+                Requirements
+            </a>
 
-            <li>⚠️ Alerts</li>
+            <a href="{{ url_for('transfers_page') }}">
+                Transfers
+            </a>
 
-        </ul>
+        </div>
 
-    </aside>
+    </nav>
 
 
-    <!-- Main -->
+    <!-- FLASH MESSAGES -->
 
-    <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
 
-        <div class="header">
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="container">
+
+        <!-- PAGE HEADER -->
+
+        <div class="page-header">
 
             <div>
 
                 <h1>🏥 Hospitals</h1>
 
                 <p>
-                    Manage government hospitals in the network.
+                    Manage hospitals participating in the medicine
+                    supply network.
                 </p>
 
             </div>
@@ -223,121 +96,228 @@
         </div>
 
 
-        <!-- Add Hospital Form -->
+        <!-- ADD HOSPITAL -->
 
-        <div class="form-box">
+        <section class="section">
 
-            <h2>➕ Add New Hospital</h2>
+            <div class="form-card">
 
-            <form action="/add-hospital" method="POST">
+                <h2>➕ Add New Hospital</h2>
 
-                <div class="form-group">
-
-                    <label>
-                        Hospital Name
-                    </label>
-
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Enter hospital name"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label>
-                        Location
-                    </label>
-
-                    <input
-                        type="text"
-                        name="location"
-                        placeholder="Enter city/location"
-                        required
-                    >
-
-                </div>
-
-
-                <button
-                    type="submit"
-                    class="submit-button"
+                <form
+                    action="{{ url_for('add_hospital') }}"
+                    method="POST"
                 >
-                    Add Hospital
-                </button>
 
-            </form>
+                    <div class="form-grid">
 
-        </div>
+                        <div class="form-group">
 
+                            <label for="name">
+                                Hospital Name
+                            </label>
 
-        <!-- Hospital List -->
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                placeholder="Enter hospital name"
+                                required
+                            >
 
-        <div class="table-box">
-
-            <h2>Hospital Network</h2>
-
-            <br>
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>ID</th>
-
-                        <th>Hospital Name</th>
-
-                        <th>Location</th>
-
-                        <th>Status</th>
-
-                    </tr>
-
-                </thead>
+                        </div>
 
 
-                <tbody>
+                        <div class="form-group">
 
-                    {% for hospital in hospitals %}
+                            <label for="location">
+                                Location
+                            </label>
 
-                    <tr>
+                            <input
+                                type="text"
+                                id="location"
+                                name="location"
+                                placeholder="Enter city/location"
+                                required
+                            >
 
-                        <td>
-                            {{ hospital["id"] }}
-                        </td>
+                        </div>
 
-                        <td>
-                            {{ hospital["name"] }}
-                        </td>
 
-                        <td>
-                            {{ hospital["location"] }}
-                        </td>
+                        <div class="form-group">
 
-                        <td class="status">
-                            🟢 Active
-                        </td>
+                            <label for="contact">
+                                Contact Number
+                            </label>
 
-                    </tr>
+                            <input
+                                type="tel"
+                                id="contact"
+                                name="contact"
+                                placeholder="Enter contact number"
+                            >
 
-                    {% endfor %}
+                        </div>
 
-                </tbody>
 
-            </table>
+                        <div class="form-group"
+                             style="justify-content: flex-end;">
 
-        </div>
+                            <button
+                                type="submit"
+                                class="button"
+                            >
+                                Add Hospital
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- HOSPITAL LIST -->
+
+        <section class="section">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>Registered Hospitals</h2>
+
+                    <p>
+                        {{ hospitals|length }}
+                        hospital(s) currently registered.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% if hospitals %}
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>Hospital Name</th>
+
+                                <th>Location</th>
+
+                                <th>Contact</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for hospital in hospitals %}
+
+                                <tr>
+
+                                    <td>
+                                        #{{ hospital.id }}
+                                    </td>
+
+                                    <td>
+
+                                        <strong>
+                                            {{ hospital.name }}
+                                        </strong>
+
+                                    </td>
+
+                                    <td>
+                                        📍 {{ hospital.location }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if hospital.contact %}
+
+                                            📞 {{ hospital.contact }}
+
+                                        {% else %}
+
+                                            <span
+                                                class="status-badge warning"
+                                            >
+                                                Not provided
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        🏥
+                    </div>
+
+                    <h3>
+                        No Hospitals Found
+                    </h3>
+
+                    <p>
+                        Add your first hospital using the form above.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
 
     </main>
 
-</div>
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            MedStock — Medicine Inventory & Supply Chain Management
+        </p>
+
+        <p>
+            SIH1627 Project
+        </p>
+
+    </footer>
+
+
+    <script
+        src="{{ url_for('static', filename='js/script.js') }}">
+    </script>
 
 </body>
-
 </html>

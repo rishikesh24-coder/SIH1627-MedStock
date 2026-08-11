@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,7 +9,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Inventory - MedStock</title>
+    <title>Requirements - MedStock</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -91,10 +92,11 @@
 
             <div>
 
-                <h1>📦 Inventory</h1>
+                <h1>📋 Hospital Requirements</h1>
 
                 <p>
-                    Track medicine stock across all hospitals.
+                    Record and monitor the medicine requirements
+                    of each hospital.
                 </p>
 
             </div>
@@ -102,24 +104,23 @@
         </div>
 
 
-        <!-- ================= ADD / UPDATE INVENTORY ================= -->
+        <!-- ================= ADD REQUIREMENT ================= -->
 
         <section class="section">
 
             <div class="form-card">
 
                 <h2>
-                    ➕ Add / Update Stock
+                    ➕ Add Medicine Requirement
                 </h2>
 
                 <p style="color: #6b7280; margin-bottom: 20px;">
-                    If the hospital and medicine already exist,
-                    the entered quantity will be added to the current stock.
+                    Enter the quantity of medicine required by a hospital.
                 </p>
 
 
                 <form
-                    action="{{ url_for('add_inventory') }}"
+                    action="{{ url_for('add_requirement') }}"
                     method="POST"
                 >
 
@@ -200,59 +201,40 @@
                         </div>
 
 
-                        <!-- QUANTITY -->
+                        <!-- REQUIRED QUANTITY -->
 
                         <div class="form-group">
 
-                            <label for="quantity">
-                                Quantity to Add
+                            <label for="required_quantity">
+                                Required Quantity
                             </label>
 
                             <input
                                 type="number"
-                                id="quantity"
-                                name="quantity"
+                                id="required_quantity"
+                                name="required_quantity"
                                 min="1"
-                                placeholder="Example: 100"
+                                placeholder="Example: 200"
                                 required
                             >
 
                         </div>
 
 
-                        <!-- MINIMUM STOCK -->
+                        <!-- BUTTON -->
 
-                        <div class="form-group">
-
-                            <label for="min_stock">
-                                Minimum Stock Level
-                            </label>
-
-                            <input
-                                type="number"
-                                id="min_stock"
-                                name="min_stock"
-                                min="0"
-                                value="20"
-                                placeholder="Example: 50"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- SUBMIT -->
-
-                        <div class="form-group form-full">
+                        <div class="form-group"
+                             style="justify-content: flex-end;">
 
                             <button
                                 type="submit"
                                 class="button"
                             >
-                                Update Inventory
+                                Add Requirement
                             </button>
 
                         </div>
+
 
                     </div>
 
@@ -263,7 +245,7 @@
         </section>
 
 
-        <!-- ================= INVENTORY TABLE ================= -->
+        <!-- ================= REQUIREMENTS TABLE ================= -->
 
         <section class="section">
 
@@ -273,12 +255,12 @@
                 <div>
 
                     <h2>
-                        Current Hospital Stock
+                        Current Hospital Requirements
                     </h2>
 
                     <p>
-                        {{ inventory|length }}
-                        inventory record(s) available.
+                        {{ requirements|length }}
+                        requirement(s) registered.
                     </p>
 
                 </div>
@@ -286,7 +268,7 @@
             </div>
 
 
-            {% if inventory %}
+            {% if requirements %}
 
 
                 <div class="table-container">
@@ -306,11 +288,7 @@
                                 </th>
 
                                 <th>
-                                    Batch
-                                </th>
-
-                                <th>
-                                    Expiry
+                                    Required
                                 </th>
 
                                 <th>
@@ -318,7 +296,7 @@
                                 </th>
 
                                 <th>
-                                    Minimum Stock
+                                    Shortage
                                 </th>
 
                                 <th>
@@ -333,7 +311,7 @@
                         <tbody>
 
 
-                            {% for item in inventory %}
+                            {% for requirement in requirements %}
 
 
                                 <tr>
@@ -344,7 +322,7 @@
                                     <td>
 
                                         <strong>
-                                            {{ item.hospital_name }}
+                                            {{ requirement.hospital_name }}
                                         </strong>
 
                                     </td>
@@ -353,21 +331,20 @@
                                     <!-- MEDICINE -->
 
                                     <td>
-                                        {{ item.medicine_name }}
+
+                                        {{ requirement.medicine_name }}
+
                                     </td>
 
 
-                                    <!-- BATCH -->
+                                    <!-- REQUIRED -->
 
                                     <td>
-                                        {{ item.batch_number }}
-                                    </td>
 
+                                        <strong>
+                                            {{ requirement.required_quantity }}
+                                        </strong>
 
-                                    <!-- EXPIRY -->
-
-                                    <td>
-                                        {{ item.expiry_date }}
                                     </td>
 
 
@@ -375,17 +352,35 @@
 
                                     <td>
 
-                                        <strong>
-                                            {{ item.quantity }}
-                                        </strong>
+                                        {{ requirement.current_stock }}
 
                                     </td>
 
 
-                                    <!-- MINIMUM STOCK -->
+                                    <!-- SHORTAGE -->
 
                                     <td>
-                                        {{ item.min_stock }}
+
+
+                                        {% if requirement.shortage > 0 %}
+
+                                            <span
+                                                class="quantity-badge"
+                                            >
+                                                {{ requirement.shortage }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span
+                                                class="quantity-badge"
+                                            >
+                                                0
+                                            </span>
+
+                                        {% endif %}
+
+
                                     </td>
 
 
@@ -394,12 +389,12 @@
                                     <td>
 
 
-                                        {% if item.quantity <= item.min_stock %}
+                                        {% if requirement.shortage > 0 %}
 
                                             <span
                                                 class="status-badge danger"
                                             >
-                                                🔴 Low Stock
+                                                🔴 Shortage
                                             </span>
 
 
@@ -408,7 +403,7 @@
                                             <span
                                                 class="status-badge success"
                                             >
-                                                ✅ Healthy
+                                                ✅ Requirement Met
                                             </span>
 
                                         {% endif %}
@@ -436,15 +431,15 @@
                 <div class="empty-state">
 
                     <div class="empty-icon">
-                        📦
+                        📋
                     </div>
 
                     <h3>
-                        No Inventory Records
+                        No Requirements Found
                     </h3>
 
                     <p>
-                        Add medicine stock using the form above.
+                        Add a hospital requirement using the form above.
                     </p>
 
                 </div>
@@ -452,6 +447,77 @@
 
             {% endif %}
 
+
+        </section>
+
+
+        <!-- ================= HOW IT WORKS ================= -->
+
+        <section class="section">
+
+            <div class="form-card">
+
+                <h2>
+                    💡 How Requirement Analysis Works
+                </h2>
+
+                <p style="color: #6b7280; margin-bottom: 15px;">
+                    MedStock compares the required quantity with
+                    the current hospital stock.
+                </p>
+
+
+                <div class="alert-grid">
+
+
+                    <div class="alert-card danger-alert">
+
+                        <div class="alert-icon">
+                            🔴
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Shortage Detected
+                            </h3>
+
+                            <p>
+                                Required quantity is greater than
+                                current stock. The shortage can be
+                                supplied from another hospital.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert-card success-alert">
+
+                        <div class="alert-icon">
+                            ✅
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Requirement Met
+                            </h3>
+
+                            <p>
+                                Current stock is equal to or greater
+                                than the required quantity.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
 
         </section>
 

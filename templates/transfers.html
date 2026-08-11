@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Transfers - MedStock</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        💊 MedStock
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('hospitals_page') }}">Hospitals</a>
+        <a href="{{ url_for('medicines_page') }}">Medicines</a>
+        <a href="{{ url_for('inventory_page') }}">Inventory</a>
+        <a href="{{ url_for('requirements_page') }}">Requirements</a>
+        <a href="{{ url_for('transfers_page') }}">Transfers</a>
+
+    </div>
+
+</nav>
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div class="flash-container">
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+{% endwith %}
+
+
+<main class="container">
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>🔄 Medicine Transfers</h1>
+
+            <p>
+                Transfer excess medicine stock to hospitals
+                experiencing shortages.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- SMART TRANSFER SUGGESTIONS -->
+
+    <section class="section">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>🤖 Smart Transfer Suggestions</h2>
+
+                <p>
+                    MedStock compares shortages with excess
+                    stock at other hospitals.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if suggestions %}
+
+            {% for suggestion in suggestions %}
+
+                <div class="form-card"
+                     style="margin-bottom: 20px;">
+
+                    <div class="section-title">
+
+                        <div>
+
+                            <h2>
+                                💊 {{ suggestion.medicine_name }}
+                            </h2>
+
+                            <p>
+                                Recommended medicine redistribution
+                            </p>
+
+                        </div>
+
+                        <span class="status-badge warning">
+                            Action Recommended
+                        </span>
+
+                    </div>
+
+
+                    <div class="alert-grid">
+
+                        <div class="alert-card success-alert">
+
+                            <div class="alert-icon">
+                                📦
+                            </div>
+
+                            <div>
+
+                                <h3>From Hospital</h3>
+
+                                <p>
+                                    <strong>
+                                        {{ suggestion.from_hospital }}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Excess stock is available here.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="alert-card danger-alert">
+
+                            <div class="alert-icon">
+                                🏥
+                            </div>
+
+                            <div>
+
+                                <h3>To Hospital</h3>
+
+                                <p>
+                                    <strong>
+                                        {{ suggestion.to_hospital }}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    This hospital has a shortage.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TRANSFER DETAILS -->
+
+                    <div style="
+                        margin-top: 20px;
+                        padding: 20px;
+                        background: #f0fdfa;
+                        border-radius: 12px;
+                        border: 1px solid #ccfbf1;
+                    ">
+
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 20px;
+                        ">
+
+                            <div>
+
+                                <p style="
+                                    color: #6b7280;
+                                    font-size: 13px;
+                                ">
+                                    Recommended Transfer
+                                </p>
+
+                                <h2 style="color: #0f766e;">
+                                    {{ suggestion.quantity }} units
+                                </h2>
+
+                            </div>
+
+
+                            <div>
+
+                                <p style="
+                                    color: #6b7280;
+                                    font-size: 13px;
+                                ">
+                                    Medicine
+                                </p>
+
+                                <strong>
+                                    {{ suggestion.medicine_name }}
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <p style="
+                                    color: #6b7280;
+                                    font-size: 13px;
+                                ">
+                                    Shortage
+                                </p>
+
+                                <strong>
+                                    {{ suggestion.shortage }} units
+                                </strong>
+
+                            </div>
+
+
+                            <!-- IMPORTANT: CONFIRMATION IS DIRECTLY HERE -->
+
+                            <form
+                                action="{{ url_for('create_transfer') }}"
+                                method="POST"
+                                onsubmit="return confirm('Are you sure you want to complete this transfer of {{ suggestion.quantity }} units of {{ suggestion.medicine_name }}?');"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="from_hospital_id"
+                                    value="{{ suggestion.from_hospital_id }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="to_hospital_id"
+                                    value="{{ suggestion.to_hospital_id }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="medicine_id"
+                                    value="{{ suggestion.medicine_id }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="quantity"
+                                    value="{{ suggestion.quantity }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="button"
+                                >
+                                    Complete Transfer
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    ✅
+                </div>
+
+                <h3>
+                    No Transfer Suggestions
+                </h3>
+
+                <p>
+                    There are currently no hospitals with
+                    matching shortages and excess stock.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- TRANSFER HISTORY -->
+
+    <section class="section">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>📋 Transfer History</h2>
+
+                <p>
+                    Record of completed medicine transfers.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if transfers %}
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Medicine</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Date</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for transfer in transfers %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        {{ transfer.medicine_name }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    {{ transfer.from_hospital }}
+                                </td>
+
+                                <td>
+                                    {{ transfer.to_hospital }}
+                                </td>
+
+                                <td>
+                                    <span class="quantity-badge">
+                                        {{ transfer.quantity }}
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <span class="status-badge success">
+                                        ✅ {{ transfer.status }}
+                                    </span>
+
+                                </td>
+
+                                <td>
+                                    {{ transfer.transfer_date }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📦
+                </div>
+
+                <h3>No Transfer History</h3>
+
+                <p>
+                    Completed transfers will appear here.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+
+    <section class="section">
+
+        <div class="form-card">
+
+            <h2>🧠 How MedStock Decides a Transfer</h2>
+
+            <div style="
+                margin-top: 20px;
+                display: grid;
+                gap: 12px;
+            ">
+
+                <div style="
+                    padding: 15px;
+                    background: #f9fafb;
+                    border-radius: 10px;
+                ">
+
+                    <strong>1️⃣ Find shortage</strong>
+
+                    <p style="color: #6b7280; margin-top: 5px;">
+                        Find hospitals where required medicine
+                        is greater than current stock.
+                    </p>
+
+                </div>
+
+
+                <div style="
+                    padding: 15px;
+                    background: #f9fafb;
+                    border-radius: 10px;
+                ">
+
+                    <strong>2️⃣ Find excess</strong>
+
+                    <p style="color: #6b7280; margin-top: 5px;">
+                        Find other hospitals with stock above
+                        their minimum stock level.
+                    </p>
+
+                </div>
+
+
+                <div style="
+                    padding: 15px;
+                    background: #f9fafb;
+                    border-radius: 10px;
+                ">
+
+                    <strong>3️⃣ Calculate quantity</strong>
+
+                    <p style="color: #6b7280; margin-top: 5px;">
+                        Recommend the smaller value between
+                        available excess and shortage.
+                    </p>
+
+                </div>
+
+
+                <div style="
+                    padding: 15px;
+                    background: #f0fdfa;
+                    border-radius: 10px;
+                    border: 1px solid #ccfbf1;
+                ">
+
+                    <strong>4️⃣ Complete transfer</strong>
+
+                    <p style="color: #6b7280; margin-top: 5px;">
+                        After confirmation, stock is automatically
+                        updated in both hospitals.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <p>
+        MedStock — Medicine Inventory & Supply Chain Management
+    </p>
+
+    <p>
+        SIH1627 Project
+    </p>
+
+</footer>
+
+</body>
+
+</html>

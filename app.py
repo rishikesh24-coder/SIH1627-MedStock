@@ -1,465 +1,479 @@
-from flask import Flask, render_template, request, redirect
-import sqlite3
-from datetime import date, datetime
-
+from flask import Flask, render_template, request, redirect, url_for, flash
+from database import get_db_connection, init_db
+from datetime import date, timedelta
 
 app = Flask(__name__)
+app.secret_key = "medstock-secret-key"
 
-DATABASE = "medstock.db"
+init_db()
 
-
-def get_database_connection():
-    connection = sqlite3.connect(DATABASE)
-    connection.row_factory = sqlite3.Row
-    return connection
-
-
-# ==================================================
-# DASHBOARD
-# ==================================================
 
 @app.route("/")
-def home():
+def dashboard():
+    conn = get_db_connection()
 
-    connection = get_database_connection()
+    hospitals = conn.execute(
+        "SELECT COUNT(*) AS count FROM hospitals"
+    ).fetchone()["count"]
 
-    # -----------------------------------------------
-    # COUNT HOSPITALS
-    # -----------------------------------------------
+    medicines = conn.execute(
+        "SELECT COUNT(*) AS count FROM medicines"
+    ).fetchone()["count"]
 
-    hospital_count = connection.execute(
-        "SELECT COUNT(*) FROM hospitals"
-    ).fetchone()[0]
-
-
-    # -----------------------------------------------
-    # COUNT MEDICINES
-    # -----------------------------------------------
-
-    medicine_count = connection.execute(
-        "SELECT COUNT(*) FROM medicines"
-    ).fetchone()[0]
-
-
-    # -----------------------------------------------
-    # LOW STOCK
-    # -----------------------------------------------
-
-    low_stock_items = connection.execute("""
-        SELECT
-            hospitals.name AS hospital_name,
-            medicines.name AS medicine_name,
-            inventory.stock_quantity,
-            inventory.minimum_stock
+    low_stock = conn.execute("""
+        SELECT COUNT(*) AS count
         FROM inventory
-        JOIN hospitals
-            ON inventory.hospital_id = hospitals.id
-        JOIN medicines
-            ON inventory.medicine_id = medicines.id
-        WHERE inventory.stock_quantity < inventory.minimum_stock
-    """).fetchall()
-
-
-    # -----------------------------------------------
-    # EXPIRY INFORMATION
-    # -----------------------------------------------
-
-    inventory_items = connection.execute("""
-        SELECT
-            hospitals.name AS hospital_name,
-            medicines.name AS medicine_name,
-            inventory.expiry_date
-        FROM inventory
-        JOIN hospitals
-            ON inventory.hospital_id = hospitals.id
-        JOIN medicines
-            ON inventory.medicine_id = medicines.id
-    """).fetchall()
-
-
-    # -----------------------------------------------
-    # FIND NEAR EXPIRY MEDICINES
-    # -----------------------------------------------
-
-    near_expiry_items = []
+        WHERE quantity <= min_stock
+    """).fetchone()["count"]
 
     today = date.today()
+    expiry_limit = today + timedelta(days=90)
 
+    near_expiry = conn.execute("""
+        SELECT COUNT(*) AS count
+        FROM medicines
+        WHERE date(expiry_date) <= date(?)
+    """, (expiry_limit.isoformat(),)).fetchone()["count"]
 
-    for item in inventory_items:
+    requirements = conn.execute("""
+        SELECT COUNT(*) AS count
+        FROM requirements
+    """).fetchone()["count"]
 
-        expiry_date = datetime.strptime(
-            item["expiry_date"],
-            "%Y-%m-%d"
-        ).date()
+    suggested_transfers = get_transfer_suggestions(conn)
 
-        days_remaining = (expiry_date - today).days
-
-
-        if 0 <= days_remaining <= 30:
-
-            near_expiry_items.append({
-                "hospital_name": item["hospital_name"],
-                "medicine_name": item["medicine_name"],
-                "expiry_date": item["expiry_date"],
-                "days_remaining": days_remaining
-            })
-
-
-    # -----------------------------------------------
-    # TRANSFER RECOMMENDATIONS
-    # -----------------------------------------------
-
-    all_inventory = connection.execute("""
+    recent_transfers = conn.execute("""
         SELECT
-            inventory.hospital_id,
-            inventory.medicine_id,
-            hospitals.name AS hospital_name,
-            medicines.name AS medicine_name,
-            inventory.stock_quantity,
-            inventory.minimum_stock
-        FROM inventory
-        JOIN hospitals
-            ON inventory.hospital_id = hospitals.id
-        JOIN medicines
-            ON inventory.medicine_id = medicines.id
-        ORDER BY inventory.medicine_id
+            t.id,
+            h1.name AS from_hospital,
+            h2.name AS to_hospital,
+            m.name AS medicine_name,
+            t.quantity,
+            t.status,
+            t.transfer_date
+        FROM transfers t
+        JOIN hospitals h1 ON t.from_hospital_id = h1.id
+        JOIN hospitals h2 ON t.to_hospital_id = h2.id
+        JOIN medicines m ON t.medicine_id = m.id
+        ORDER BY t.id DESC
+        LIMIT 5
     """).fetchall()
 
-
-    transfer_recommendations = []
-
-
-    # Group inventory by medicine
-    medicine_groups = {}
-
-
-    for item in all_inventory:
-
-        medicine_id = item["medicine_id"]
-
-        if medicine_id not in medicine_groups:
-
-            medicine_groups[medicine_id] = []
-
-        medicine_groups[medicine_id].append(item)
-
-
-    # Find hospitals with excess and shortage
-    for medicine_id, items in medicine_groups.items():
-
-        donors = []
-        recipients = []
-
-
-        for item in items:
-
-            excess = (
-                item["stock_quantity"]
-                - item["minimum_stock"]
-            )
-
-            shortage = (
-                item["minimum_stock"]
-                - item["stock_quantity"]
-            )
-
-
-            # Hospital has excess
-            if excess > 0:
-
-                donors.append({
-                    "hospital_name": item["hospital_name"],
-                    "medicine_name": item["medicine_name"],
-                    "excess": excess
-                })
-
-
-            # Hospital has shortage
-            elif shortage > 0:
-
-                recipients.append({
-                    "hospital_name": item["hospital_name"],
-                    "medicine_name": item["medicine_name"],
-                    "shortage": shortage
-                })
-
-
-        # Match donor with recipient
-        for donor in donors:
-
-            for recipient in recipients:
-
-                transfer_quantity = min(
-                    donor["excess"],
-                    recipient["shortage"]
-                )
-
-
-                if transfer_quantity > 0:
-
-                    transfer_recommendations.append({
-
-                        "medicine_name":
-                            donor["medicine_name"],
-
-                        "from_hospital":
-                            donor["hospital_name"],
-
-                        "to_hospital":
-                            recipient["hospital_name"],
-
-                        "quantity":
-                            transfer_quantity
-
-                    })
-
-
-    connection.close()
-
-
-    # -----------------------------------------------
-    # SEND DATA TO HTML
-    # -----------------------------------------------
+    conn.close()
 
     return render_template(
-
         "index.html",
-
-        hospital_count=hospital_count,
-
-        medicine_count=medicine_count,
-
-        low_stock_count=len(low_stock_items),
-
-        low_stock_items=low_stock_items,
-
-        near_expiry_items=near_expiry_items,
-
-        transfer_recommendations=transfer_recommendations
-
+        hospitals=hospitals,
+        medicines=medicines,
+        low_stock=low_stock,
+        near_expiry=near_expiry,
+        requirements=requirements,
+        suggestions=suggested_transfers,
+        recent_transfers=recent_transfers
     )
 
-
-# ==================================================
-# HOSPITALS
-# ==================================================
 
 @app.route("/hospitals")
-def hospitals():
+def hospitals_page():
+    conn = get_db_connection()
 
-    connection = get_database_connection()
+    hospitals = conn.execute("""
+        SELECT * FROM hospitals
+        ORDER BY name
+    """).fetchall()
 
-    hospitals = connection.execute(
-        "SELECT * FROM hospitals ORDER BY id"
-    ).fetchall()
+    conn.close()
 
-    connection.close()
-
-    return render_template(
-        "hospitals.html",
-        hospitals=hospitals
-    )
+    return render_template("hospitals.html", hospitals=hospitals)
 
 
-# ==================================================
-# ADD HOSPITAL
-# ==================================================
-
-@app.route("/add-hospital", methods=["POST"])
+@app.route("/hospitals/add", methods=["POST"])
 def add_hospital():
-
     name = request.form["name"]
-
     location = request.form["location"]
+    contact = request.form["contact"]
 
+    conn = get_db_connection()
 
-    connection = get_database_connection()
+    conn.execute("""
+        INSERT INTO hospitals (name, location, contact)
+        VALUES (?, ?, ?)
+    """, (name, location, contact))
 
+    conn.commit()
+    conn.close()
 
-    connection.execute(
-        """
-        INSERT INTO hospitals
-        (name, location)
-        VALUES (?, ?)
-        """,
+    flash("Hospital added successfully.", "success")
 
-        (name, location)
-    )
+    return redirect(url_for("hospitals_page"))
 
-
-    connection.commit()
-
-    connection.close()
-
-
-    return redirect("/hospitals")
-
-
-# ==================================================
-# MEDICINES
-# ==================================================
 
 @app.route("/medicines")
-def medicines():
+def medicines_page():
+    conn = get_db_connection()
 
-    connection = get_database_connection()
+    medicines = conn.execute("""
+        SELECT * FROM medicines
+        ORDER BY expiry_date
+    """).fetchall()
 
-    medicines = connection.execute(
-        "SELECT * FROM medicines ORDER BY id"
-    ).fetchall()
+    conn.close()
 
-    connection.close()
-
-    return render_template(
-        "medicines.html",
-        medicines=medicines
-    )
+    return render_template("medicines.html", medicines=medicines)
 
 
-# ==================================================
-# ADD MEDICINE
-# ==================================================
-
-@app.route("/add-medicine", methods=["POST"])
+@app.route("/medicines/add", methods=["POST"])
 def add_medicine():
-
     name = request.form["name"]
-
     category = request.form["category"]
+    batch_number = request.form["batch_number"]
+    expiry_date = request.form["expiry_date"]
 
+    conn = get_db_connection()
 
-    connection = get_database_connection()
-
-
-    connection.execute(
-        """
+    conn.execute("""
         INSERT INTO medicines
-        (name, category)
-        VALUES (?, ?)
-        """,
+        (name, category, batch_number, expiry_date)
+        VALUES (?, ?, ?, ?)
+    """, (name, category, batch_number, expiry_date))
 
-        (name, category)
-    )
+    conn.commit()
+    conn.close()
 
+    flash("Medicine added successfully.", "success")
 
-    connection.commit()
+    return redirect(url_for("medicines_page"))
 
-    connection.close()
-
-
-    return redirect("/medicines")
-
-
-# ==================================================
-# INVENTORY
-# ==================================================
 
 @app.route("/inventory")
-def inventory():
+def inventory_page():
+    conn = get_db_connection()
 
-    connection = get_database_connection()
-
-
-    inventory_items = connection.execute("""
+    inventory = conn.execute("""
         SELECT
             inventory.id,
             hospitals.name AS hospital_name,
             medicines.name AS medicine_name,
-            inventory.stock_quantity,
-            inventory.minimum_stock,
-            inventory.expiry_date
+            medicines.batch_number,
+            medicines.expiry_date,
+            inventory.quantity,
+            inventory.min_stock
         FROM inventory
-        JOIN hospitals
-            ON inventory.hospital_id = hospitals.id
-        JOIN medicines
-            ON inventory.medicine_id = medicines.id
-        ORDER BY inventory.id
+        JOIN hospitals ON inventory.hospital_id = hospitals.id
+        JOIN medicines ON inventory.medicine_id = medicines.id
+        ORDER BY hospitals.name, medicines.name
     """).fetchall()
 
-
-    hospitals = connection.execute(
+    hospitals = conn.execute(
         "SELECT * FROM hospitals ORDER BY name"
     ).fetchall()
 
-
-    medicines = connection.execute(
+    medicines = conn.execute(
         "SELECT * FROM medicines ORDER BY name"
     ).fetchall()
 
-
-    connection.close()
-
+    conn.close()
 
     return render_template(
-
         "inventory.html",
-
-        inventory_items=inventory_items,
-
+        inventory=inventory,
         hospitals=hospitals,
-
         medicines=medicines
-
     )
 
 
-# ==================================================
-# ADD INVENTORY
-# ==================================================
-
-@app.route("/add-inventory", methods=["POST"])
+@app.route("/inventory/add", methods=["POST"])
 def add_inventory():
-
     hospital_id = request.form["hospital_id"]
-
     medicine_id = request.form["medicine_id"]
+    quantity = int(request.form["quantity"])
+    min_stock = int(request.form["min_stock"])
 
-    stock_quantity = request.form["stock_quantity"]
+    conn = get_db_connection()
 
-    minimum_stock = request.form["minimum_stock"]
+    existing = conn.execute("""
+        SELECT id
+        FROM inventory
+        WHERE hospital_id = ? AND medicine_id = ?
+    """, (hospital_id, medicine_id)).fetchone()
 
-    expiry_date = request.form["expiry_date"]
+    if existing:
+        conn.execute("""
+            UPDATE inventory
+            SET quantity = quantity + ?, min_stock = ?
+            WHERE id = ?
+        """, (quantity, min_stock, existing["id"]))
+
+        message = "Inventory updated successfully."
+    else:
+        conn.execute("""
+            INSERT INTO inventory
+            (hospital_id, medicine_id, quantity, min_stock)
+            VALUES (?, ?, ?, ?)
+        """, (hospital_id, medicine_id, quantity, min_stock))
+
+        message = "Inventory added successfully."
+
+    conn.commit()
+    conn.close()
+
+    flash(message, "success")
+
+    return redirect(url_for("inventory_page"))
 
 
-    connection = get_database_connection()
+@app.route("/requirements")
+def requirements_page():
+    conn = get_db_connection()
 
+    requirements = conn.execute("""
+        SELECT
+            r.id,
+            hospitals.name AS hospital_name,
+            medicines.name AS medicine_name,
+            r.required_quantity,
+            COALESCE(i.quantity, 0) AS current_stock,
+            CASE
+                WHEN r.required_quantity - COALESCE(i.quantity, 0) > 0
+                THEN r.required_quantity - COALESCE(i.quantity, 0)
+                ELSE 0
+            END AS shortage
+        FROM requirements r
+        JOIN hospitals ON r.hospital_id = hospitals.id
+        JOIN medicines ON r.medicine_id = medicines.id
+        LEFT JOIN inventory i
+            ON i.hospital_id = r.hospital_id
+            AND i.medicine_id = r.medicine_id
+        ORDER BY shortage DESC
+    """).fetchall()
 
-    connection.execute(
-        """
-        INSERT INTO inventory
-        (
-            hospital_id,
-            medicine_id,
-            stock_quantity,
-            minimum_stock,
-            expiry_date
-        )
-        VALUES (?, ?, ?, ?, ?)
-        """,
+    hospitals = conn.execute(
+        "SELECT * FROM hospitals ORDER BY name"
+    ).fetchall()
 
-        (
-            hospital_id,
-            medicine_id,
-            stock_quantity,
-            minimum_stock,
-            expiry_date
-        )
+    medicines = conn.execute(
+        "SELECT * FROM medicines ORDER BY name"
+    ).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "requirements.html",
+        requirements=requirements,
+        hospitals=hospitals,
+        medicines=medicines
     )
 
 
-    connection.commit()
+@app.route("/requirements/add", methods=["POST"])
+def add_requirement():
+    hospital_id = request.form["hospital_id"]
+    medicine_id = request.form["medicine_id"]
+    required_quantity = int(request.form["required_quantity"])
 
-    connection.close()
+    conn = get_db_connection()
+
+    conn.execute("""
+        INSERT INTO requirements
+        (hospital_id, medicine_id, required_quantity)
+        VALUES (?, ?, ?)
+    """, (hospital_id, medicine_id, required_quantity))
+
+    conn.commit()
+    conn.close()
+
+    flash("Requirement added successfully.", "success")
+
+    return redirect(url_for("requirements_page"))
 
 
-    return redirect("/inventory")
+@app.route("/transfers")
+def transfers_page():
+    conn = get_db_connection()
+
+    suggestions = get_transfer_suggestions(conn)
+
+    transfers = conn.execute("""
+        SELECT
+            t.id,
+            h1.name AS from_hospital,
+            h2.name AS to_hospital,
+            m.name AS medicine_name,
+            t.quantity,
+            t.status,
+            t.transfer_date
+        FROM transfers t
+        JOIN hospitals h1 ON t.from_hospital_id = h1.id
+        JOIN hospitals h2 ON t.to_hospital_id = h2.id
+        JOIN medicines m ON t.medicine_id = m.id
+        ORDER BY t.id DESC
+    """).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "transfers.html",
+        suggestions=suggestions,
+        transfers=transfers
+    )
 
 
-# ==================================================
-# START APPLICATION
-# ==================================================
+@app.route("/transfers/create", methods=["POST"])
+def create_transfer():
+    from_hospital_id = request.form["from_hospital_id"]
+    to_hospital_id = request.form["to_hospital_id"]
+    medicine_id = request.form["medicine_id"]
+    quantity = int(request.form["quantity"])
+
+    if from_hospital_id == to_hospital_id:
+        flash("Source and destination hospitals cannot be the same.", "error")
+        return redirect(url_for("transfers_page"))
+
+    conn = get_db_connection()
+
+    source = conn.execute("""
+        SELECT quantity
+        FROM inventory
+        WHERE hospital_id = ? AND medicine_id = ?
+    """, (from_hospital_id, medicine_id)).fetchone()
+
+    if not source or source["quantity"] < quantity:
+        flash("Transfer quantity is greater than available stock.", "error")
+        conn.close()
+        return redirect(url_for("transfers_page"))
+
+    conn.execute("""
+        INSERT INTO transfers
+        (from_hospital_id, to_hospital_id, medicine_id,
+         quantity, status, transfer_date)
+        VALUES (?, ?, ?, ?, 'Completed', ?)
+    """, (
+        from_hospital_id,
+        to_hospital_id,
+        medicine_id,
+        quantity,
+        date.today().isoformat()
+    ))
+
+    conn.execute("""
+        UPDATE inventory
+        SET quantity = quantity - ?
+        WHERE hospital_id = ? AND medicine_id = ?
+    """, (quantity, from_hospital_id, medicine_id))
+
+    destination = conn.execute("""
+        SELECT id
+        FROM inventory
+        WHERE hospital_id = ? AND medicine_id = ?
+    """, (to_hospital_id, medicine_id)).fetchone()
+
+    if destination:
+        conn.execute("""
+            UPDATE inventory
+            SET quantity = quantity + ?
+            WHERE hospital_id = ? AND medicine_id = ?
+        """, (quantity, to_hospital_id, medicine_id))
+    else:
+        conn.execute("""
+            INSERT INTO inventory
+            (hospital_id, medicine_id, quantity, min_stock)
+            VALUES (?, ?, ?, 20)
+        """, (to_hospital_id, medicine_id, quantity))
+
+    conn.commit()
+    conn.close()
+
+    flash("Medicine transfer completed successfully.", "success")
+
+    return redirect(url_for("transfers_page"))
+
+
+def get_transfer_suggestions(conn):
+    inventory_rows = conn.execute("""
+        SELECT
+            i.hospital_id,
+            i.medicine_id,
+            i.quantity,
+            i.min_stock,
+            h.name AS hospital_name,
+            m.name AS medicine_name
+        FROM inventory i
+        JOIN hospitals h ON i.hospital_id = h.id
+        JOIN medicines m ON i.medicine_id = m.id
+    """).fetchall()
+
+    suggestions = []
+
+    for item in inventory_rows:
+
+        # Hospital has shortage
+        requirement = conn.execute("""
+            SELECT required_quantity
+            FROM requirements
+            WHERE hospital_id = ? AND medicine_id = ?
+            ORDER BY id DESC
+            LIMIT 1
+        """, (item["hospital_id"], item["medicine_id"])).fetchone()
+
+        if not requirement:
+            continue
+
+        shortage = requirement["required_quantity"] - item["quantity"]
+
+        if shortage <= 0:
+            continue
+
+        # Find hospitals having excess stock of same medicine
+        donors = conn.execute("""
+            SELECT
+                i.hospital_id,
+                i.quantity,
+                i.min_stock,
+                h.name AS hospital_name
+            FROM inventory i
+            JOIN hospitals h ON i.hospital_id = h.id
+            WHERE i.medicine_id = ?
+              AND i.hospital_id != ?
+              AND i.quantity > i.min_stock
+            ORDER BY (i.quantity - i.min_stock) DESC
+        """, (item["medicine_id"], item["hospital_id"])).fetchall()
+
+        remaining_shortage = shortage
+
+        for donor in donors:
+
+            excess = donor["quantity"] - donor["min_stock"]
+
+            if excess <= 0:
+                continue
+
+            transfer_quantity = min(excess, remaining_shortage)
+
+            suggestions.append({
+                "from_hospital_id": donor["hospital_id"],
+                "from_hospital": donor["hospital_name"],
+                "to_hospital_id": item["hospital_id"],
+                "to_hospital": item["hospital_name"],
+                "medicine_id": item["medicine_id"],
+                "medicine_name": item["medicine_name"],
+                "quantity": transfer_quantity,
+                "shortage": shortage
+            })
+
+            remaining_shortage -= transfer_quantity
+
+            if remaining_shortage <= 0:
+                break
+
+    return suggestions
+
+
+@app.route("/seed")
+def seed_page():
+    init_db()
+    flash("Demo database initialized.", "success")
+    return redirect(url_for("dashboard"))
+
 
 if __name__ == "__main__":
-
     app.run(debug=True)

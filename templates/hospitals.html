@@ -1,94 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Hospitals - MedStock</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hospitals | MedStock</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
+
 
 <body>
 
-    <!-- NAVBAR -->
 
-    <nav class="navbar">
+<nav class="navbar">
 
-        <div class="logo">
-            💊 MedStock
+    <div class="logo">
+        💊 MedStock
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('hospitals_page') }}">
+            Hospitals
+        </a>
+
+        <a href="{{ url_for('medicines_page') }}">
+            Medicines
+        </a>
+
+        <a href="{{ url_for('inventory_page') }}">
+            Inventory
+        </a>
+
+        <a href="{{ url_for('requirements_page') }}">
+            Requirements
+        </a>
+
+        <a href="{{ url_for('transfers_page') }}">
+            Transfers
+        </a>
+
+    </div>
+
+</nav>
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div class="flash-container">
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
         </div>
 
-        <div class="nav-links">
+    {% endif %}
 
-            <a href="{{ url_for('dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('hospitals_page') }}">
-                Hospitals
-            </a>
-
-            <a href="{{ url_for('medicines_page') }}">
-                Medicines
-            </a>
-
-            <a href="{{ url_for('inventory_page') }}">
-                Inventory
-            </a>
-
-            <a href="{{ url_for('requirements_page') }}">
-                Requirements
-            </a>
-
-            <a href="{{ url_for('transfers_page') }}">
-                Transfers
-            </a>
-
-        </div>
-
-    </nav>
+{% endwith %}
 
 
-    <!-- FLASH MESSAGES -->
+<main class="container">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
 
-        {% if messages %}
+    <div class="page-header">
 
-            <div class="flash-container">
+        <h1>
+            🏥 Hospital Network
+        </h1>
 
-                {% for category, message in messages %}
+        <p>
+            Manage hospitals participating in the MedStock
+            medicine supply network.
+        </p>
 
-                    <div class="flash {{ category }}">
-                        {{ message }}
-                    </div>
+    </div>
 
-                {% endfor %}
+
+    <!-- ADD HOSPITAL -->
+
+    <section class="section">
+
+        <div class="form-card">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>
+                        ➕ Add New Hospital
+                    </h2>
+
+                    <p>
+                        Register a hospital in the network.
+                    </p>
+
+                </div>
 
             </div>
 
-        {% endif %}
 
-    {% endwith %}
+            <form
+                action="{{ url_for('add_hospital') }}"
+                method="POST"
+            >
+
+                <div class="form-grid">
 
 
-    <!-- MAIN CONTENT -->
+                    <div class="form-group">
 
-    <main class="container">
+                        <label for="name">
+                            Hospital Name
+                        </label>
 
-        <!-- PAGE HEADER -->
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Example: District Hospital Kalyan"
+                            required
+                        >
 
-        <div class="page-header">
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="location">
+                            Location
+                        </label>
+
+                        <input
+                            type="text"
+                            id="location"
+                            name="location"
+                            placeholder="Example: Kalyan"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="contact">
+                            Contact Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="contact"
+                            name="contact"
+                            placeholder="Enter contact number"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group"
+                         style="justify-content:flex-end;">
+
+                        <button
+                            type="submit"
+                            class="button"
+                        >
+                            🏥 Add Hospital
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- HOSPITAL LIST -->
+
+    <section class="section">
+
+        <div class="section-title">
 
             <div>
 
-                <h1>🏥 Hospitals</h1>
+                <h2>
+                    🏥 Registered Hospitals
+                </h2>
 
                 <p>
-                    Manage hospitals participating in the medicine
-                    supply network.
+                    {{ hospitals|length }}
+                    hospital(s) registered.
                 </p>
 
             </div>
@@ -96,228 +220,127 @@
         </div>
 
 
-        <!-- ADD HOSPITAL -->
-
-        <section class="section">
-
-            <div class="form-card">
-
-                <h2>➕ Add New Hospital</h2>
-
-                <form
-                    action="{{ url_for('add_hospital') }}"
-                    method="POST"
-                >
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-
-                            <label for="name">
-                                Hospital Name
-                            </label>
-
-                            <input
-                                type="text"
-                                id="name"
-                                name="name"
-                                placeholder="Enter hospital name"
-                                required
-                            >
-
-                        </div>
+        {% if hospitals %}
 
 
-                        <div class="form-group">
+            <div class="table-container">
 
-                            <label for="location">
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Hospital
+                            </th>
+
+                            <th>
                                 Location
-                            </label>
+                            </th>
 
-                            <input
-                                type="text"
-                                id="location"
-                                name="location"
-                                placeholder="Enter city/location"
-                                required
-                            >
+                            <th>
+                                Contact
+                            </th>
 
-                        </div>
+                            <th>
+                                Status
+                            </th>
 
+                        </tr>
 
-                        <div class="form-group">
-
-                            <label for="contact">
-                                Contact Number
-                            </label>
-
-                            <input
-                                type="tel"
-                                id="contact"
-                                name="contact"
-                                placeholder="Enter contact number"
-                            >
-
-                        </div>
+                    </thead>
 
 
-                        <div class="form-group"
-                             style="justify-content: flex-end;">
+                    <tbody>
 
-                            <button
-                                type="submit"
-                                class="button"
-                            >
-                                Add Hospital
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </section>
-
-
-        <!-- HOSPITAL LIST -->
-
-        <section class="section">
-
-            <div class="section-title">
-
-                <div>
-
-                    <h2>Registered Hospitals</h2>
-
-                    <p>
-                        {{ hospitals|length }}
-                        hospital(s) currently registered.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            {% if hospitals %}
-
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
+                        {% for hospital in hospitals %}
 
                             <tr>
 
-                                <th>ID</th>
+                                <td>
 
-                                <th>Hospital Name</th>
+                                    <strong>
+                                        🏥 {{ hospital.name }}
+                                    </strong>
 
-                                <th>Location</th>
+                                </td>
 
-                                <th>Contact</th>
+                                <td>
+                                    📍 {{ hospital.location }}
+                                </td>
+
+                                <td>
+                                    {{ hospital.contact or "Not provided" }}
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="status-badge success"
+                                    >
+                                        ● Active
+                                    </span>
+
+                                </td>
 
                             </tr>
 
-                        </thead>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
 
-                        <tbody>
+        {% else %}
 
-                            {% for hospital in hospitals %}
 
-                                <tr>
+            <div class="empty-state">
 
-                                    <td>
-                                        #{{ hospital.id }}
-                                    </td>
-
-                                    <td>
-
-                                        <strong>
-                                            {{ hospital.name }}
-                                        </strong>
-
-                                    </td>
-
-                                    <td>
-                                        📍 {{ hospital.location }}
-                                    </td>
-
-                                    <td>
-
-                                        {% if hospital.contact %}
-
-                                            📞 {{ hospital.contact }}
-
-                                        {% else %}
-
-                                            <span
-                                                class="status-badge warning"
-                                            >
-                                                Not provided
-                                            </span>
-
-                                        {% endif %}
-
-                                    </td>
-
-                                </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
+                <div class="empty-icon">
+                    🏥
                 </div>
 
-            {% else %}
+                <h3>
+                    No Hospitals Found
+                </h3>
 
-                <div class="empty-state">
+                <p>
+                    Add your first hospital using the form above.
+                </p>
 
-                    <div class="empty-icon">
-                        🏥
-                    </div>
-
-                    <h3>
-                        No Hospitals Found
-                    </h3>
-
-                    <p>
-                        Add your first hospital using the form above.
-                    </p>
-
-                </div>
-
-            {% endif %}
-
-        </section>
-
-    </main>
+            </div>
 
 
-    <!-- FOOTER -->
+        {% endif %}
 
-    <footer>
-
-        <p>
-            MedStock — Medicine Inventory & Supply Chain Management
-        </p>
-
-        <p>
-            SIH1627 Project
-        </p>
-
-    </footer>
+    </section>
 
 
-    <script
-        src="{{ url_for('static', filename='js/script.js') }}">
-    </script>
+</main>
+
+
+<footer>
+
+    <p>
+        <strong>💊 MedStock</strong>
+    </p>
+
+    <p>
+        Medicine Inventory & Supply Chain Management · SIH1627
+    </p>
+
+</footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/script.js') }}">
+</script>
+
 
 </body>
+
 </html>

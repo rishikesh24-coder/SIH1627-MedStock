@@ -8,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Inventory - MedStock</title>
+    <title>Inventory | MedStock</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -18,267 +18,98 @@
 
 <body>
 
-    <!-- ================= NAVBAR ================= -->
 
-    <nav class="navbar">
+<nav class="navbar">
 
-        <div class="logo">
-            💊 MedStock
-        </div>
-
-        <div class="nav-links">
-
-            <a href="{{ url_for('dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('hospitals_page') }}">
-                Hospitals
-            </a>
-
-            <a href="{{ url_for('medicines_page') }}">
-                Medicines
-            </a>
-
-            <a href="{{ url_for('inventory_page') }}">
-                Inventory
-            </a>
-
-            <a href="{{ url_for('requirements_page') }}">
-                Requirements
-            </a>
-
-            <a href="{{ url_for('transfers_page') }}">
-                Transfers
-            </a>
-
-        </div>
-
-    </nav>
+    <div class="logo">
+        💊 MedStock
+    </div>
 
 
-    <!-- ================= FLASH MESSAGES ================= -->
+    <div class="nav-links">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
 
-        {% if messages %}
+        <a href="{{ url_for('hospitals_page') }}">
+            Hospitals
+        </a>
 
-            <div class="flash-container">
+        <a href="{{ url_for('medicines_page') }}">
+            Medicines
+        </a>
 
-                {% for category, message in messages %}
+        <a href="{{ url_for('inventory_page') }}">
+            Inventory
+        </a>
 
-                    <div class="flash {{ category }}">
-                        {{ message }}
-                    </div>
+        <a href="{{ url_for('requirements_page') }}">
+            Requirements
+        </a>
 
-                {% endfor %}
+        <a href="{{ url_for('transfers_page') }}">
+            Transfers
+        </a>
 
-            </div>
+    </div>
 
-        {% endif %}
-
-    {% endwith %}
-
-
-    <!-- ================= MAIN CONTENT ================= -->
-
-    <main class="container">
+</nav>
 
 
-        <!-- PAGE HEADER -->
+{% with messages = get_flashed_messages(with_categories=true) %}
 
-        <div class="page-header">
+    {% if messages %}
 
-            <div>
+        <div class="flash-container">
 
-                <h1>📦 Inventory</h1>
+            {% for category, message in messages %}
 
-                <p>
-                    Track medicine stock across all hospitals.
-                </p>
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
 
-            </div>
+            {% endfor %}
 
         </div>
 
+    {% endif %}
 
-        <!-- ================= ADD / UPDATE INVENTORY ================= -->
-
-        <section class="section">
-
-            <div class="form-card">
-
-                <h2>
-                    ➕ Add / Update Stock
-                </h2>
-
-                <p style="color: #6b7280; margin-bottom: 20px;">
-                    If the hospital and medicine already exist,
-                    the entered quantity will be added to the current stock.
-                </p>
+{% endwith %}
 
 
-                <form
-                    action="{{ url_for('add_inventory') }}"
-                    method="POST"
-                >
-
-                    <div class="form-grid">
+<main class="container">
 
 
-                        <!-- HOSPITAL -->
+    <div class="page-header">
 
-                        <div class="form-group">
+        <h1>
+            📦 Medicine Inventory
+        </h1>
 
-                            <label for="hospital_id">
-                                Hospital
-                            </label>
+        <p>
+            Monitor medicine stock levels across the hospital network.
+        </p>
 
-                            <select
-                                id="hospital_id"
-                                name="hospital_id"
-                                required
-                            >
-
-                                <option value="">
-                                    Select hospital
-                                </option>
+    </div>
 
 
-                                {% for hospital in hospitals %}
+    <!-- ADD INVENTORY -->
 
-                                    <option value="{{ hospital.id }}">
+    <section class="section">
 
-                                        {{ hospital.name }}
-
-                                        -
-                                        {{ hospital.location }}
-
-                                    </option>
-
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- MEDICINE -->
-
-                        <div class="form-group">
-
-                            <label for="medicine_id">
-                                Medicine
-                            </label>
-
-                            <select
-                                id="medicine_id"
-                                name="medicine_id"
-                                required
-                            >
-
-                                <option value="">
-                                    Select medicine
-                                </option>
-
-
-                                {% for medicine in medicines %}
-
-                                    <option value="{{ medicine.id }}">
-
-                                        {{ medicine.name }}
-
-                                        -
-                                        {{ medicine.batch_number }}
-
-                                    </option>
-
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- QUANTITY -->
-
-                        <div class="form-group">
-
-                            <label for="quantity">
-                                Quantity to Add
-                            </label>
-
-                            <input
-                                type="number"
-                                id="quantity"
-                                name="quantity"
-                                min="1"
-                                placeholder="Example: 100"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- MINIMUM STOCK -->
-
-                        <div class="form-group">
-
-                            <label for="min_stock">
-                                Minimum Stock Level
-                            </label>
-
-                            <input
-                                type="number"
-                                id="min_stock"
-                                name="min_stock"
-                                min="0"
-                                value="20"
-                                placeholder="Example: 50"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- SUBMIT -->
-
-                        <div class="form-group form-full">
-
-                            <button
-                                type="submit"
-                                class="button"
-                            >
-                                Update Inventory
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </section>
-
-
-        <!-- ================= INVENTORY TABLE ================= -->
-
-        <section class="section">
-
+        <div class="form-card">
 
             <div class="section-title">
 
                 <div>
 
                     <h2>
-                        Current Hospital Stock
+                        ➕ Add / Update Inventory
                     </h2>
 
                     <p>
-                        {{ inventory|length }}
-                        inventory record(s) available.
+                        Add medicine stock to a hospital.
                     </p>
 
                 </div>
@@ -286,197 +117,326 @@
             </div>
 
 
-            {% if inventory %}
+            <form
+                action="{{ url_for('add_inventory') }}"
+                method="POST"
+            >
+
+                <div class="form-grid">
 
 
-                <div class="table-container">
+                    <div class="form-group">
 
-                    <table>
+                        <label for="hospital_id">
+                            Hospital
+                        </label>
 
-                        <thead>
+                        <select
+                            id="hospital_id"
+                            name="hospital_id"
+                            required
+                        >
 
-                            <tr>
+                            <option value="">
+                                Select hospital
+                            </option>
 
-                                <th>
-                                    Hospital
-                                </th>
+                            {% for hospital in hospitals %}
 
-                                <th>
-                                    Medicine
-                                </th>
+                                <option
+                                    value="{{ hospital.id }}"
+                                >
 
-                                <th>
-                                    Batch
-                                </th>
+                                    {{ hospital.name }}
+                                    -
+                                    {{ hospital.location }}
 
-                                <th>
-                                    Expiry
-                                </th>
-
-                                <th>
-                                    Current Stock
-                                </th>
-
-                                <th>
-                                    Minimum Stock
-                                </th>
-
-                                <th>
-                                    Status
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-
-                            {% for item in inventory %}
-
-
-                                <tr>
-
-
-                                    <!-- HOSPITAL -->
-
-                                    <td>
-
-                                        <strong>
-                                            {{ item.hospital_name }}
-                                        </strong>
-
-                                    </td>
-
-
-                                    <!-- MEDICINE -->
-
-                                    <td>
-                                        {{ item.medicine_name }}
-                                    </td>
-
-
-                                    <!-- BATCH -->
-
-                                    <td>
-                                        {{ item.batch_number }}
-                                    </td>
-
-
-                                    <!-- EXPIRY -->
-
-                                    <td>
-                                        {{ item.expiry_date }}
-                                    </td>
-
-
-                                    <!-- CURRENT STOCK -->
-
-                                    <td>
-
-                                        <strong>
-                                            {{ item.quantity }}
-                                        </strong>
-
-                                    </td>
-
-
-                                    <!-- MINIMUM STOCK -->
-
-                                    <td>
-                                        {{ item.min_stock }}
-                                    </td>
-
-
-                                    <!-- STATUS -->
-
-                                    <td>
-
-
-                                        {% if item.quantity <= item.min_stock %}
-
-                                            <span
-                                                class="status-badge danger"
-                                            >
-                                                🔴 Low Stock
-                                            </span>
-
-
-                                        {% else %}
-
-                                            <span
-                                                class="status-badge success"
-                                            >
-                                                ✅ Healthy
-                                            </span>
-
-                                        {% endif %}
-
-
-                                    </td>
-
-
-                                </tr>
-
+                                </option>
 
                             {% endfor %}
 
+                        </select>
 
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-            {% else %}
-
-
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        📦
                     </div>
 
-                    <h3>
-                        No Inventory Records
-                    </h3>
 
-                    <p>
-                        Add medicine stock using the form above.
-                    </p>
+                    <div class="form-group">
+
+                        <label for="medicine_id">
+                            Medicine
+                        </label>
+
+                        <select
+                            id="medicine_id"
+                            name="medicine_id"
+                            required
+                        >
+
+                            <option value="">
+                                Select medicine
+                            </option>
+
+                            {% for medicine in medicines %}
+
+                                <option
+                                    value="{{ medicine.id }}"
+                                >
+
+                                    {{ medicine.name }}
+                                    -
+                                    {{ medicine.batch_number }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="quantity">
+                            Quantity to Add
+                        </label>
+
+                        <input
+                            type="number"
+                            id="quantity"
+                            name="quantity"
+                            min="1"
+                            placeholder="Example: 100"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="min_stock">
+                            Minimum Stock Level
+                        </label>
+
+                        <input
+                            type="number"
+                            id="min_stock"
+                            name="min_stock"
+                            min="0"
+                            value="20"
+                            placeholder="Example: 50"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group form-full">
+
+                        <button
+                            type="submit"
+                            class="button"
+                        >
+                            📦 Update Inventory
+                        </button>
+
+                    </div>
+
 
                 </div>
 
+            </form>
 
-            {% endif %}
+        </div>
 
-
-        </section>
-
-
-    </main>
+    </section>
 
 
-    <!-- ================= FOOTER ================= -->
+    <!-- INVENTORY TABLE -->
 
-    <footer>
+    <section class="section">
 
-        <p>
-            MedStock — Medicine Inventory & Supply Chain Management
-        </p>
+        <div class="section-title">
 
-        <p>
-            SIH1627 Project
-        </p>
+            <div>
 
-    </footer>
+                <h2>
+                    📊 Current Hospital Stock
+                </h2>
+
+                <p>
+                    {{ inventory|length }}
+                    inventory record(s) available.
+                </p>
+
+            </div>
+
+        </div>
 
 
-    <script
-        src="{{ url_for('static', filename='js/script.js') }}">
-    </script>
+        {% if inventory %}
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Hospital
+                            </th>
+
+                            <th>
+                                Medicine
+                            </th>
+
+                            <th>
+                                Batch
+                            </th>
+
+                            <th>
+                                Expiry
+                            </th>
+
+                            <th>
+                                Stock
+                            </th>
+
+                            <th>
+                                Minimum
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for item in inventory %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        🏥 {{ item.hospital_name }}
+                                    </strong>
+
+                                </td>
+
+                                <td>
+                                    💊 {{ item.medicine_name }}
+                                </td>
+
+                                <td>
+                                    {{ item.batch_number }}
+                                </td>
+
+                                <td>
+                                    {{ item.expiry_date }}
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ item.quantity }}
+                                    </strong>
+
+                                    units
+
+                                </td>
+
+                                <td>
+                                    {{ item.min_stock }}
+                                </td>
+
+                                <td>
+
+                                    {% if item.quantity <= item.min_stock %}
+
+                                        <span
+                                            class="status-badge danger"
+                                        >
+                                            🔴 Low Stock
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="status-badge success"
+                                        >
+                                            ✅ Healthy
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📦
+                </div>
+
+                <h3>
+                    No Inventory Records
+                </h3>
+
+                <p>
+                    Add medicine stock using the form above.
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+    </section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        <strong>💊 MedStock</strong>
+    </p>
+
+    <p>
+        Medicine Inventory & Supply Chain Management · SIH1627
+    </p>
+
+</footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/script.js') }}">
+</script>
+
 
 </body>
 

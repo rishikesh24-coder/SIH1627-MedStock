@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +8,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Requirements - MedStock</title>
+    <title>Requirements | MedStock</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -19,248 +18,99 @@
 
 <body>
 
-    <!-- ================= NAVBAR ================= -->
 
-    <nav class="navbar">
+<nav class="navbar">
 
-        <div class="logo">
-            💊 MedStock
-        </div>
-
-        <div class="nav-links">
-
-            <a href="{{ url_for('dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('hospitals_page') }}">
-                Hospitals
-            </a>
-
-            <a href="{{ url_for('medicines_page') }}">
-                Medicines
-            </a>
-
-            <a href="{{ url_for('inventory_page') }}">
-                Inventory
-            </a>
-
-            <a href="{{ url_for('requirements_page') }}">
-                Requirements
-            </a>
-
-            <a href="{{ url_for('transfers_page') }}">
-                Transfers
-            </a>
-
-        </div>
-
-    </nav>
+    <div class="logo">
+        💊 MedStock
+    </div>
 
 
-    <!-- ================= FLASH MESSAGES ================= -->
+    <div class="nav-links">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
 
-        {% if messages %}
+        <a href="{{ url_for('hospitals_page') }}">
+            Hospitals
+        </a>
 
-            <div class="flash-container">
+        <a href="{{ url_for('medicines_page') }}">
+            Medicines
+        </a>
 
-                {% for category, message in messages %}
+        <a href="{{ url_for('inventory_page') }}">
+            Inventory
+        </a>
 
-                    <div class="flash {{ category }}">
-                        {{ message }}
-                    </div>
+        <a href="{{ url_for('requirements_page') }}">
+            Requirements
+        </a>
 
-                {% endfor %}
+        <a href="{{ url_for('transfers_page') }}">
+            Transfers
+        </a>
 
-            </div>
+    </div>
 
-        {% endif %}
-
-    {% endwith %}
-
-
-    <!-- ================= MAIN CONTENT ================= -->
-
-    <main class="container">
+</nav>
 
 
-        <!-- PAGE HEADER -->
+{% with messages = get_flashed_messages(with_categories=true) %}
 
-        <div class="page-header">
+    {% if messages %}
 
-            <div>
+        <div class="flash-container">
 
-                <h1>📋 Hospital Requirements</h1>
+            {% for category, message in messages %}
 
-                <p>
-                    Record and monitor the medicine requirements
-                    of each hospital.
-                </p>
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
 
-            </div>
+            {% endfor %}
 
         </div>
 
+    {% endif %}
 
-        <!-- ================= ADD REQUIREMENT ================= -->
-
-        <section class="section">
-
-            <div class="form-card">
-
-                <h2>
-                    ➕ Add Medicine Requirement
-                </h2>
-
-                <p style="color: #6b7280; margin-bottom: 20px;">
-                    Enter the quantity of medicine required by a hospital.
-                </p>
+{% endwith %}
 
 
-                <form
-                    action="{{ url_for('add_requirement') }}"
-                    method="POST"
-                >
-
-                    <div class="form-grid">
+<main class="container">
 
 
-                        <!-- HOSPITAL -->
+    <div class="page-header">
 
-                        <div class="form-group">
+        <h1>
+            📋 Hospital Requirements
+        </h1>
 
-                            <label for="hospital_id">
-                                Hospital
-                            </label>
+        <p>
+            Record and monitor medicine requirements
+            for each hospital.
+        </p>
 
-                            <select
-                                id="hospital_id"
-                                name="hospital_id"
-                                required
-                            >
-
-                                <option value="">
-                                    Select hospital
-                                </option>
+    </div>
 
 
-                                {% for hospital in hospitals %}
+    <!-- ADD REQUIREMENT -->
 
-                                    <option value="{{ hospital.id }}">
+    <section class="section">
 
-                                        {{ hospital.name }}
-
-                                        -
-                                        {{ hospital.location }}
-
-                                    </option>
-
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- MEDICINE -->
-
-                        <div class="form-group">
-
-                            <label for="medicine_id">
-                                Medicine
-                            </label>
-
-                            <select
-                                id="medicine_id"
-                                name="medicine_id"
-                                required
-                            >
-
-                                <option value="">
-                                    Select medicine
-                                </option>
-
-
-                                {% for medicine in medicines %}
-
-                                    <option value="{{ medicine.id }}">
-
-                                        {{ medicine.name }}
-
-                                        -
-                                        {{ medicine.batch_number }}
-
-                                    </option>
-
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- REQUIRED QUANTITY -->
-
-                        <div class="form-group">
-
-                            <label for="required_quantity">
-                                Required Quantity
-                            </label>
-
-                            <input
-                                type="number"
-                                id="required_quantity"
-                                name="required_quantity"
-                                min="1"
-                                placeholder="Example: 200"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- BUTTON -->
-
-                        <div class="form-group"
-                             style="justify-content: flex-end;">
-
-                            <button
-                                type="submit"
-                                class="button"
-                            >
-                                Add Requirement
-                            </button>
-
-                        </div>
-
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </section>
-
-
-        <!-- ================= REQUIREMENTS TABLE ================= -->
-
-        <section class="section">
-
+        <div class="form-card">
 
             <div class="section-title">
 
                 <div>
 
                     <h2>
-                        Current Hospital Requirements
+                        ➕ Add Medicine Requirement
                     </h2>
 
                     <p>
-                        {{ requirements|length }}
-                        requirement(s) registered.
+                        Enter the quantity required by a hospital.
                     </p>
 
                 </div>
@@ -268,281 +118,386 @@
             </div>
 
 
-            {% if requirements %}
+            <form
+                action="{{ url_for('add_requirement') }}"
+                method="POST"
+            >
 
+                <div class="form-grid">
 
-                <div class="table-container">
 
-                    <table>
+                    <div class="form-group">
 
-                        <thead>
+                        <label for="hospital_id">
+                            Hospital
+                        </label>
 
-                            <tr>
+                        <select
+                            id="hospital_id"
+                            name="hospital_id"
+                            required
+                        >
 
-                                <th>
-                                    Hospital
-                                </th>
+                            <option value="">
+                                Select hospital
+                            </option>
 
-                                <th>
-                                    Medicine
-                                </th>
+                            {% for hospital in hospitals %}
 
-                                <th>
-                                    Required
-                                </th>
+                                <option
+                                    value="{{ hospital.id }}"
+                                >
 
-                                <th>
-                                    Current Stock
-                                </th>
+                                    {{ hospital.name }}
+                                    -
+                                    {{ hospital.location }}
 
-                                <th>
-                                    Shortage
-                                </th>
-
-                                <th>
-                                    Status
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-
-                            {% for requirement in requirements %}
-
-
-                                <tr>
-
-
-                                    <!-- HOSPITAL -->
-
-                                    <td>
-
-                                        <strong>
-                                            {{ requirement.hospital_name }}
-                                        </strong>
-
-                                    </td>
-
-
-                                    <!-- MEDICINE -->
-
-                                    <td>
-
-                                        {{ requirement.medicine_name }}
-
-                                    </td>
-
-
-                                    <!-- REQUIRED -->
-
-                                    <td>
-
-                                        <strong>
-                                            {{ requirement.required_quantity }}
-                                        </strong>
-
-                                    </td>
-
-
-                                    <!-- CURRENT STOCK -->
-
-                                    <td>
-
-                                        {{ requirement.current_stock }}
-
-                                    </td>
-
-
-                                    <!-- SHORTAGE -->
-
-                                    <td>
-
-
-                                        {% if requirement.shortage > 0 %}
-
-                                            <span
-                                                class="quantity-badge"
-                                            >
-                                                {{ requirement.shortage }}
-                                            </span>
-
-                                        {% else %}
-
-                                            <span
-                                                class="quantity-badge"
-                                            >
-                                                0
-                                            </span>
-
-                                        {% endif %}
-
-
-                                    </td>
-
-
-                                    <!-- STATUS -->
-
-                                    <td>
-
-
-                                        {% if requirement.shortage > 0 %}
-
-                                            <span
-                                                class="status-badge danger"
-                                            >
-                                                🔴 Shortage
-                                            </span>
-
-
-                                        {% else %}
-
-                                            <span
-                                                class="status-badge success"
-                                            >
-                                                ✅ Requirement Met
-                                            </span>
-
-                                        {% endif %}
-
-
-                                    </td>
-
-
-                                </tr>
-
+                                </option>
 
                             {% endfor %}
 
+                        </select>
 
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-            {% else %}
-
-
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        📋
                     </div>
 
-                    <h3>
-                        No Requirements Found
-                    </h3>
 
-                    <p>
-                        Add a hospital requirement using the form above.
-                    </p>
+                    <div class="form-group">
+
+                        <label for="medicine_id">
+                            Medicine
+                        </label>
+
+                        <select
+                            id="medicine_id"
+                            name="medicine_id"
+                            required
+                        >
+
+                            <option value="">
+                                Select medicine
+                            </option>
+
+                            {% for medicine in medicines %}
+
+                                <option
+                                    value="{{ medicine.id }}"
+                                >
+
+                                    {{ medicine.name }}
+                                    -
+                                    {{ medicine.batch_number }}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="required_quantity">
+                            Required Quantity
+                        </label>
+
+                        <input
+                            type="number"
+                            id="required_quantity"
+                            name="required_quantity"
+                            min="1"
+                            placeholder="Example: 200"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group"
+                         style="justify-content:flex-end;">
+
+                        <button
+                            type="submit"
+                            class="button"
+                        >
+                            📋 Add Requirement
+                        </button>
+
+                    </div>
+
 
                 </div>
 
+            </form>
 
-            {% endif %}
+        </div>
+
+    </section>
 
 
-        </section>
+    <!-- REQUIREMENTS TABLE -->
 
+    <section class="section">
 
-        <!-- ================= HOW IT WORKS ================= -->
+        <div class="section-title">
 
-        <section class="section">
-
-            <div class="form-card">
+            <div>
 
                 <h2>
-                    💡 How Requirement Analysis Works
+                    📊 Current Hospital Requirements
                 </h2>
 
-                <p style="color: #6b7280; margin-bottom: 15px;">
-                    MedStock compares the required quantity with
-                    the current hospital stock.
+                <p>
+                    {{ requirements|length }}
+                    requirement(s) registered.
                 </p>
-
-
-                <div class="alert-grid">
-
-
-                    <div class="alert-card danger-alert">
-
-                        <div class="alert-icon">
-                            🔴
-                        </div>
-
-                        <div>
-
-                            <h3>
-                                Shortage Detected
-                            </h3>
-
-                            <p>
-                                Required quantity is greater than
-                                current stock. The shortage can be
-                                supplied from another hospital.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="alert-card success-alert">
-
-                        <div class="alert-icon">
-                            ✅
-                        </div>
-
-                        <div>
-
-                            <h3>
-                                Requirement Met
-                            </h3>
-
-                            <p>
-                                Current stock is equal to or greater
-                                than the required quantity.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
 
             </div>
 
-        </section>
+        </div>
 
 
-    </main>
+        {% if requirements %}
 
 
-    <!-- ================= FOOTER ================= -->
+            <div class="table-container">
 
-    <footer>
+                <table>
 
-        <p>
-            MedStock — Medicine Inventory & Supply Chain Management
-        </p>
+                    <thead>
 
-        <p>
-            SIH1627 Project
-        </p>
+                        <tr>
 
-    </footer>
+                            <th>
+                                Hospital
+                            </th>
+
+                            <th>
+                                Medicine
+                            </th>
+
+                            <th>
+                                Required
+                            </th>
+
+                            <th>
+                                Current Stock
+                            </th>
+
+                            <th>
+                                Shortage
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
 
 
-    <script
-        src="{{ url_for('static', filename='js/script.js') }}">
-    </script>
+                    <tbody>
+
+                        {% for requirement in requirements %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+                                        🏥 {{ requirement.hospital_name }}
+                                    </strong>
+
+                                </td>
+
+                                <td>
+                                    💊 {{ requirement.medicine_name }}
+                                </td>
+
+                                <td>
+
+                                    <strong>
+                                        {{ requirement.required_quantity }}
+                                    </strong>
+
+                                </td>
+
+                                <td>
+                                    {{ requirement.current_stock }}
+                                </td>
+
+                                <td>
+
+                                    {% if requirement.shortage > 0 %}
+
+                                        <span
+                                            class="quantity-badge"
+                                        >
+                                            {{ requirement.shortage }}
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="quantity-badge"
+                                        >
+                                            0
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if requirement.shortage > 0 %}
+
+                                        <span
+                                            class="status-badge danger"
+                                        >
+                                            🔴 Shortage
+                                        </span>
+
+                                    {% else %}
+
+                                        <span
+                                            class="status-badge success"
+                                        >
+                                            ✅ Requirement Met
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📋
+                </div>
+
+                <h3>
+                    No Requirements Found
+                </h3>
+
+                <p>
+                    Add a hospital requirement using the form above.
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- HOW IT WORKS -->
+
+    <section class="section">
+
+        <div class="form-card">
+
+            <h2>
+                💡 How Requirement Analysis Works
+            </h2>
+
+            <p style="color:#7c899d; margin:8px 0 18px;">
+                MedStock compares required medicine quantity
+                with current hospital stock.
+            </p>
+
+
+            <div class="alert-grid">
+
+
+                <div class="alert-card danger-alert">
+
+                    <div class="alert-icon">
+                        🔴
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Shortage Detected
+                        </h3>
+
+                        <p>
+                            Required quantity is greater than
+                            available stock.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="alert-card success-alert">
+
+                    <div class="alert-icon">
+                        ✅
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Requirement Met
+                        </h3>
+
+                        <p>
+                            Current stock is sufficient for
+                            the hospital requirement.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        <strong>💊 MedStock</strong>
+    </p>
+
+    <p>
+        Medicine Inventory & Supply Chain Management · SIH1627
+    </p>
+
+</footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/script.js') }}">
+</script>
+
 
 </body>
 

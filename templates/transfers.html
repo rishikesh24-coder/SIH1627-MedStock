@@ -2,16 +2,22 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Transfers - MedStock</title>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Transfers | MedStock</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
 
+
 <body>
+
 
 <nav class="navbar">
 
@@ -19,14 +25,32 @@
         💊 MedStock
     </div>
 
+
     <div class="nav-links">
 
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('hospitals_page') }}">Hospitals</a>
-        <a href="{{ url_for('medicines_page') }}">Medicines</a>
-        <a href="{{ url_for('inventory_page') }}">Inventory</a>
-        <a href="{{ url_for('requirements_page') }}">Requirements</a>
-        <a href="{{ url_for('transfers_page') }}">Transfers</a>
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('hospitals_page') }}">
+            Hospitals
+        </a>
+
+        <a href="{{ url_for('medicines_page') }}">
+            Medicines
+        </a>
+
+        <a href="{{ url_for('inventory_page') }}">
+            Inventory
+        </a>
+
+        <a href="{{ url_for('requirements_page') }}">
+            Requirements
+        </a>
+
+        <a href="{{ url_for('transfers_page') }}">
+            Transfers
+        </a>
 
     </div>
 
@@ -56,23 +80,22 @@
 
 <main class="container">
 
+
     <div class="page-header">
 
-        <div>
+        <h1>
+            🔄 Medicine Transfers
+        </h1>
 
-            <h1>🔄 Medicine Transfers</h1>
-
-            <p>
-                Transfer excess medicine stock to hospitals
-                experiencing shortages.
-            </p>
-
-        </div>
+        <p>
+            Redistribute excess medicine stock to hospitals
+            experiencing shortages.
+        </p>
 
     </div>
 
 
-    <!-- SMART TRANSFER SUGGESTIONS -->
+    <!-- ================= SMART SUGGESTIONS ================= -->
 
     <section class="section">
 
@@ -80,11 +103,13 @@
 
             <div>
 
-                <h2>🤖 Smart Transfer Suggestions</h2>
+                <h2>
+                    🤖 Smart Transfer Suggestions
+                </h2>
 
                 <p>
-                    MedStock compares shortages with excess
-                    stock at other hospitals.
+                    Recommended transfers based on hospital
+                    stock and requirements.
                 </p>
 
             </div>
@@ -94,10 +119,13 @@
 
         {% if suggestions %}
 
+
             {% for suggestion in suggestions %}
 
+
                 <div class="form-card"
-                     style="margin-bottom: 20px;">
+                     style="margin-bottom:18px;">
+
 
                     <div class="section-title">
 
@@ -108,12 +136,14 @@
                             </h2>
 
                             <p>
-                                Recommended medicine redistribution
+                                Recommended redistribution
                             </p>
 
                         </div>
 
-                        <span class="status-badge warning">
+                        <span
+                            class="status-badge warning"
+                        >
                             Action Recommended
                         </span>
 
@@ -121,6 +151,9 @@
 
 
                     <div class="alert-grid">
+
+
+                        <!-- SOURCE -->
 
                         <div class="alert-card success-alert">
 
@@ -130,7 +163,9 @@
 
                             <div>
 
-                                <h3>From Hospital</h3>
+                                <h3>
+                                    From Hospital
+                                </h3>
 
                                 <p>
                                     <strong>
@@ -139,13 +174,15 @@
                                 </p>
 
                                 <p>
-                                    Excess stock is available here.
+                                    Excess stock available.
                                 </p>
 
                             </div>
 
                         </div>
 
+
+                        <!-- DESTINATION -->
 
                         <div class="alert-card danger-alert">
 
@@ -155,7 +192,9 @@
 
                             <div>
 
-                                <h3>To Hospital</h3>
+                                <h3>
+                                    To Hospital
+                                </h3>
 
                                 <p>
                                     <strong>
@@ -164,45 +203,53 @@
                                 </p>
 
                                 <p>
-                                    This hospital has a shortage.
+                                    Medicine shortage detected.
                                 </p>
 
                             </div>
 
                         </div>
 
+
                     </div>
 
 
-                    <!-- TRANSFER DETAILS -->
+                    <!-- TRANSFER INFORMATION -->
 
-                    <div style="
-                        margin-top: 20px;
-                        padding: 20px;
-                        background: #f0fdfa;
-                        border-radius: 12px;
-                        border: 1px solid #ccfbf1;
-                    ">
+                    <div
+                        style="
+                            margin-top:18px;
+                            padding:18px;
+                            background:#f0f8ff;
+                            border-radius:12px;
+                            border:1px solid #dceeff;
+                        "
+                    >
 
-                        <div style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            flex-wrap: wrap;
-                            gap: 20px;
-                        ">
+                        <div
+                            style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:space-between;
+                                flex-wrap:wrap;
+                                gap:18px;
+                            "
+                        >
+
 
                             <div>
 
-                                <p style="
-                                    color: #6b7280;
-                                    font-size: 13px;
-                                ">
-                                    Recommended Transfer
-                                </p>
+                                <small
+                                    style="color:#7c899d;"
+                                >
+                                    RECOMMENDED QUANTITY
+                                </small>
 
-                                <h2 style="color: #0f766e;">
-                                    {{ suggestion.quantity }} units
+                                <h2
+                                    style="color:#087de8;"
+                                >
+                                    {{ suggestion.quantity }}
+                                    units
                                 </h2>
 
                             </div>
@@ -210,37 +257,19 @@
 
                             <div>
 
-                                <p style="
-                                    color: #6b7280;
-                                    font-size: 13px;
-                                ">
-                                    Medicine
-                                </p>
+                                <small
+                                    style="color:#7c899d;"
+                                >
+                                    SHORTAGE
+                                </small>
 
-                                <strong>
-                                    {{ suggestion.medicine_name }}
-                                </strong>
-
-                            </div>
-
-
-                            <div>
-
-                                <p style="
-                                    color: #6b7280;
-                                    font-size: 13px;
-                                ">
-                                    Shortage
-                                </p>
-
-                                <strong>
-                                    {{ suggestion.shortage }} units
-                                </strong>
+                                <h3>
+                                    {{ suggestion.shortage }}
+                                    units
+                                </h3>
 
                             </div>
 
-
-                            <!-- IMPORTANT: CONFIRMATION IS DIRECTLY HERE -->
 
                             <form
                                 action="{{ url_for('create_transfer') }}"
@@ -276,21 +305,25 @@
                                     type="submit"
                                     class="button"
                                 >
-                                    Complete Transfer
+                                    🔄 Complete Transfer
                                 </button>
 
                             </form>
+
 
                         </div>
 
                     </div>
 
+
                 </div>
+
 
             {% endfor %}
 
 
         {% else %}
+
 
             <div class="empty-state">
 
@@ -303,18 +336,20 @@
                 </h3>
 
                 <p>
-                    There are currently no hospitals with
-                    matching shortages and excess stock.
+                    There are currently no matching shortages
+                    and excess stock situations.
                 </p>
 
             </div>
 
+
         {% endif %}
+
 
     </section>
 
 
-    <!-- TRANSFER HISTORY -->
+    <!-- ================= HISTORY ================= -->
 
     <section class="section">
 
@@ -322,7 +357,9 @@
 
             <div>
 
-                <h2>📋 Transfer History</h2>
+                <h2>
+                    📋 Transfer History
+                </h2>
 
                 <p>
                     Record of completed medicine transfers.
@@ -335,6 +372,7 @@
 
         {% if transfers %}
 
+
             <div class="table-container">
 
                 <table>
@@ -343,16 +381,34 @@
 
                         <tr>
 
-                            <th>Medicine</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                            <th>Date</th>
+                            <th>
+                                Medicine
+                            </th>
+
+                            <th>
+                                From
+                            </th>
+
+                            <th>
+                                To
+                            </th>
+
+                            <th>
+                                Quantity
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
 
                         </tr>
 
                     </thead>
+
 
                     <tbody>
 
@@ -361,9 +417,12 @@
                             <tr>
 
                                 <td>
+
                                     <strong>
+                                        💊
                                         {{ transfer.medicine_name }}
                                     </strong>
+
                                 </td>
 
                                 <td>
@@ -375,14 +434,20 @@
                                 </td>
 
                                 <td>
-                                    <span class="quantity-badge">
+
+                                    <span
+                                        class="quantity-badge"
+                                    >
                                         {{ transfer.quantity }}
                                     </span>
+
                                 </td>
 
                                 <td>
 
-                                    <span class="status-badge success">
+                                    <span
+                                        class="status-badge success"
+                                    >
                                         ✅ {{ transfer.status }}
                                     </span>
 
@@ -402,7 +467,9 @@
 
             </div>
 
+
         {% else %}
+
 
             <div class="empty-state">
 
@@ -410,7 +477,9 @@
                     📦
                 </div>
 
-                <h3>No Transfer History</h3>
+                <h3>
+                    No Transfer History
+                </h3>
 
                 <p>
                     Completed transfers will appear here.
@@ -418,88 +487,121 @@
 
             </div>
 
+
         {% endif %}
+
 
     </section>
 
 
-    <!-- HOW IT WORKS -->
+    <!-- ================= HOW IT WORKS ================= -->
 
     <section class="section">
 
         <div class="form-card">
 
-            <h2>🧠 How MedStock Decides a Transfer</h2>
+            <h2>
+                🧠 How Smart Transfer Works
+            </h2>
 
-            <div style="
-                margin-top: 20px;
-                display: grid;
-                gap: 12px;
-            ">
-
-                <div style="
-                    padding: 15px;
-                    background: #f9fafb;
-                    border-radius: 10px;
-                ">
-
-                    <strong>1️⃣ Find shortage</strong>
-
-                    <p style="color: #6b7280; margin-top: 5px;">
-                        Find hospitals where required medicine
-                        is greater than current stock.
-                    </p>
-
-                </div>
+            <p
+                style="color:#7c899d; margin:8px 0 18px;"
+            >
+                MedStock automatically compares shortages
+                with excess medicine stock.
+            </p>
 
 
-                <div style="
-                    padding: 15px;
-                    background: #f9fafb;
-                    border-radius: 10px;
-                ">
+            <div class="alert-grid">
 
-                    <strong>2️⃣ Find excess</strong>
 
-                    <p style="color: #6b7280; margin-top: 5px;">
-                        Find other hospitals with stock above
-                        their minimum stock level.
-                    </p>
+                <div class="alert-card danger-alert">
+
+                    <div class="alert-icon">
+                        🔴
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            1. Find Shortage
+                        </h3>
+
+                        <p>
+                            Identify hospitals where required
+                            medicine is greater than available stock.
+                        </p>
+
+                    </div>
 
                 </div>
 
 
-                <div style="
-                    padding: 15px;
-                    background: #f9fafb;
-                    border-radius: 10px;
-                ">
+                <div class="alert-card success-alert">
 
-                    <strong>3️⃣ Calculate quantity</strong>
+                    <div class="alert-icon">
+                        📦
+                    </div>
 
-                    <p style="color: #6b7280; margin-top: 5px;">
-                        Recommend the smaller value between
-                        available excess and shortage.
-                    </p>
+                    <div>
+
+                        <h3>
+                            2. Find Excess
+                        </h3>
+
+                        <p>
+                            Find another hospital with sufficient
+                            excess medicine stock.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="alert-card warning-alert">
+
+                    <div class="alert-icon">
+                        🧮
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            3. Calculate Quantity
+                        </h3>
+
+                        <p>
+                            Recommend a transfer based on shortage
+                            and available excess.
+                        </p>
+
+                    </div>
 
                 </div>
 
 
-                <div style="
-                    padding: 15px;
-                    background: #f0fdfa;
-                    border-radius: 10px;
-                    border: 1px solid #ccfbf1;
-                ">
+                <div class="alert-card success-alert">
 
-                    <strong>4️⃣ Complete transfer</strong>
+                    <div class="alert-icon">
+                        🔄
+                    </div>
 
-                    <p style="color: #6b7280; margin-top: 5px;">
-                        After confirmation, stock is automatically
-                        updated in both hospitals.
-                    </p>
+                    <div>
+
+                        <h3>
+                            4. Transfer
+                        </h3>
+
+                        <p>
+                            Confirm the transfer and update stock
+                            at both hospitals.
+                        </p>
+
+                    </div>
 
                 </div>
+
 
             </div>
 
@@ -507,20 +609,27 @@
 
     </section>
 
+
 </main>
 
 
 <footer>
 
     <p>
-        MedStock — Medicine Inventory & Supply Chain Management
+        <strong>💊 MedStock</strong>
     </p>
 
     <p>
-        SIH1627 Project
+        Medicine Inventory & Supply Chain Management · SIH1627
     </p>
 
 </footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/script.js') }}">
+</script>
+
 
 </body>
 

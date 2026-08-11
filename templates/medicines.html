@@ -2,94 +2,265 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Medicines - MedStock</title>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Medicines | MedStock</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
+
 
 <body>
 
-    <!-- NAVBAR -->
 
-    <nav class="navbar">
+<nav class="navbar">
 
-        <div class="logo">
-            💊 MedStock
+    <div class="logo">
+        💊 MedStock
+    </div>
+
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('hospitals_page') }}">
+            Hospitals
+        </a>
+
+        <a href="{{ url_for('medicines_page') }}">
+            Medicines
+        </a>
+
+        <a href="{{ url_for('inventory_page') }}">
+            Inventory
+        </a>
+
+        <a href="{{ url_for('requirements_page') }}">
+            Requirements
+        </a>
+
+        <a href="{{ url_for('transfers_page') }}">
+            Transfers
+        </a>
+
+    </div>
+
+</nav>
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+    {% if messages %}
+
+        <div class="flash-container">
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
         </div>
 
-        <div class="nav-links">
+    {% endif %}
 
-            <a href="{{ url_for('dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ url_for('hospitals_page') }}">
-                Hospitals
-            </a>
-
-            <a href="{{ url_for('medicines_page') }}">
-                Medicines
-            </a>
-
-            <a href="{{ url_for('inventory_page') }}">
-                Inventory
-            </a>
-
-            <a href="{{ url_for('requirements_page') }}">
-                Requirements
-            </a>
-
-            <a href="{{ url_for('transfers_page') }}">
-                Transfers
-            </a>
-
-        </div>
-
-    </nav>
+{% endwith %}
 
 
-    <!-- FLASH MESSAGES -->
+<main class="container">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
 
-        {% if messages %}
+    <div class="page-header">
 
-            <div class="flash-container">
+        <h1>
+            💊 Medicine Catalogue
+        </h1>
 
-                {% for category, message in messages %}
+        <p>
+            Register and manage medicines available
+            throughout the hospital network.
+        </p>
 
-                    <div class="flash {{ category }}">
-                        {{ message }}
-                    </div>
+    </div>
 
-                {% endfor %}
+
+    <!-- ADD MEDICINE -->
+
+    <section class="section">
+
+        <div class="form-card">
+
+            <div class="section-title">
+
+                <div>
+
+                    <h2>
+                        ➕ Add New Medicine
+                    </h2>
+
+                    <p>
+                        Register medicine information and batch details.
+                    </p>
+
+                </div>
 
             </div>
 
-        {% endif %}
 
-    {% endwith %}
+            <form
+                action="{{ url_for('add_medicine') }}"
+                method="POST"
+            >
+
+                <div class="form-grid">
 
 
-    <!-- MAIN CONTENT -->
+                    <div class="form-group">
 
-    <main class="container">
+                        <label for="name">
+                            Medicine Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Example: Paracetamol 500mg"
+                            required
+                        >
+
+                    </div>
 
 
-        <!-- PAGE HEADER -->
+                    <div class="form-group">
 
-        <div class="page-header">
+                        <label for="category">
+                            Category
+                        </label>
+
+                        <select
+                            id="category"
+                            name="category"
+                            required
+                        >
+
+                            <option value="">
+                                Select category
+                            </option>
+
+                            <option value="Tablet">
+                                Tablet
+                            </option>
+
+                            <option value="Capsule">
+                                Capsule
+                            </option>
+
+                            <option value="Syrup">
+                                Syrup
+                            </option>
+
+                            <option value="Injection">
+                                Injection
+                            </option>
+
+                            <option value="Powder">
+                                Powder
+                            </option>
+
+                            <option value="Ointment">
+                                Ointment
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="batch_number">
+                            Batch Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="batch_number"
+                            name="batch_number"
+                            placeholder="Example: PCM006"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="expiry_date">
+                            Expiry Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="expiry_date"
+                            name="expiry_date"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group form-full">
+
+                        <button
+                            type="submit"
+                            class="button"
+                        >
+                            💊 Add Medicine
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- MEDICINE LIST -->
+
+    <section class="section">
+
+        <div class="section-title">
 
             <div>
 
-                <h1>💊 Medicines</h1>
+                <h2>
+                    📦 Registered Medicines
+                </h2>
 
                 <p>
-                    Manage medicines, batches and expiry dates.
+                    {{ medicines|length }}
+                    medicine(s) registered.
                 </p>
 
             </div>
@@ -97,312 +268,138 @@
         </div>
 
 
-        <!-- ADD MEDICINE FORM -->
-
-        <section class="section">
-
-            <div class="form-card">
-
-                <h2>➕ Add New Medicine</h2>
-
-                <form
-                    action="{{ url_for('add_medicine') }}"
-                    method="POST"
-                >
-
-                    <div class="form-grid">
+        {% if medicines %}
 
 
-                        <!-- MEDICINE NAME -->
+            <div class="table-container">
 
-                        <div class="form-group">
+                <table>
 
-                            <label for="name">
-                                Medicine Name
-                            </label>
+                    <thead>
 
-                            <input
-                                type="text"
-                                id="name"
-                                name="name"
-                                placeholder="Example: Paracetamol 500mg"
-                                required
-                            >
+                        <tr>
 
-                        </div>
+                            <th>
+                                Medicine
+                            </th>
 
-
-                        <!-- CATEGORY -->
-
-                        <div class="form-group">
-
-                            <label for="category">
+                            <th>
                                 Category
-                            </label>
+                            </th>
 
-                            <select
-                                id="category"
-                                name="category"
-                                required
-                            >
+                            <th>
+                                Batch
+                            </th>
 
-                                <option value="">
-                                    Select category
-                                </option>
-
-                                <option value="Tablet">
-                                    Tablet
-                                </option>
-
-                                <option value="Capsule">
-                                    Capsule
-                                </option>
-
-                                <option value="Syrup">
-                                    Syrup
-                                </option>
-
-                                <option value="Injection">
-                                    Injection
-                                </option>
-
-                                <option value="Powder">
-                                    Powder
-                                </option>
-
-                                <option value="Ointment">
-                                    Ointment
-                                </option>
-
-                                <option value="Other">
-                                    Other
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- BATCH NUMBER -->
-
-                        <div class="form-group">
-
-                            <label for="batch_number">
-                                Batch Number
-                            </label>
-
-                            <input
-                                type="text"
-                                id="batch_number"
-                                name="batch_number"
-                                placeholder="Example: PCM006"
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- EXPIRY DATE -->
-
-                        <div class="form-group">
-
-                            <label for="expiry_date">
+                            <th>
                                 Expiry Date
-                            </label>
+                            </th>
 
-                            <input
-                                type="date"
-                                id="expiry_date"
-                                name="expiry_date"
-                                required
-                            >
+                            <th>
+                                Status
+                            </th>
 
-                        </div>
+                        </tr>
 
-
-                        <!-- SUBMIT -->
-
-                        <div class="form-group form-full">
-
-                            <button
-                                type="submit"
-                                class="button"
-                            >
-                                Add Medicine
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </section>
+                    </thead>
 
 
-        <!-- MEDICINE LIST -->
+                    <tbody>
 
-        <section class="section">
-
-            <div class="section-title">
-
-                <div>
-
-                    <h2>
-                        Medicine Inventory Master
-                    </h2>
-
-                    <p>
-                        {{ medicines|length }}
-                        medicine batch(es) registered.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            {% if medicines %}
-
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
+                        {% for medicine in medicines %}
 
                             <tr>
 
-                                <th>
-                                    ID
-                                </th>
+                                <td>
 
-                                <th>
-                                    Medicine
-                                </th>
+                                    <strong>
+                                        💊 {{ medicine.name }}
+                                    </strong>
 
-                                <th>
-                                    Category
-                                </th>
+                                </td>
 
-                                <th>
-                                    Batch Number
-                                </th>
+                                <td>
 
-                                <th>
-                                    Expiry Date
-                                </th>
+                                    <span class="quantity-badge">
+                                        {{ medicine.category }}
+                                    </span>
 
-                                <th>
-                                    Status
-                                </th>
+                                </td>
+
+                                <td>
+                                    {{ medicine.batch_number }}
+                                </td>
+
+                                <td>
+                                    {{ medicine.expiry_date }}
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="status-badge success"
+                                    >
+                                        ● Registered
+                                    </span>
+
+                                </td>
 
                             </tr>
 
-                        </thead>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
 
-                        <tbody>
-
-                            {% for medicine in medicines %}
-
-                                <tr>
-
-                                    <td>
-                                        #{{ medicine.id }}
-                                    </td>
+        {% else %}
 
 
-                                    <td>
+            <div class="empty-state">
 
-                                        <strong>
-                                            {{ medicine.name }}
-                                        </strong>
-
-                                    </td>
-
-
-                                    <td>
-
-                                        <span class="quantity-badge">
-                                            {{ medicine.category }}
-                                        </span>
-
-                                    </td>
-
-
-                                    <td>
-                                        {{ medicine.batch_number }}
-                                    </td>
-
-
-                                    <td>
-                                        {{ medicine.expiry_date }}
-                                    </td>
-
-
-                                    <td>
-
-                                        <span class="status-badge success">
-                                            Active
-                                        </span>
-
-                                    </td>
-
-                                </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
+                <div class="empty-icon">
+                    💊
                 </div>
 
-            {% else %}
+                <h3>
+                    No Medicines Found
+                </h3>
 
-                <div class="empty-state">
+                <p>
+                    Add your first medicine using the form above.
+                </p>
 
-                    <div class="empty-icon">
-                        💊
-                    </div>
-
-                    <h3>
-                        No Medicines Found
-                    </h3>
-
-                    <p>
-                        Add your first medicine using the form above.
-                    </p>
-
-                </div>
-
-            {% endif %}
-
-        </section>
-
-    </main>
+            </div>
 
 
-    <!-- FOOTER -->
+        {% endif %}
 
-    <footer>
-
-        <p>
-            MedStock — Medicine Inventory & Supply Chain Management
-        </p>
-
-        <p>
-            SIH1627 Project
-        </p>
-
-    </footer>
+    </section>
 
 
-    <script
-        src="{{ url_for('static', filename='js/script.js') }}">
-    </script>
+</main>
+
+
+<footer>
+
+    <p>
+        <strong>💊 MedStock</strong>
+    </p>
+
+    <p>
+        Medicine Inventory & Supply Chain Management · SIH1627
+    </p>
+
+</footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/script.js') }}">
+</script>
+
 
 </body>
 

@@ -1,569 +1,645 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>MedStock - Medicine Inventory System</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MedStock | Dashboard</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
+
 
 <body>
 
-    <nav class="navbar">
 
-        <div class="logo">
-            💊 MedStock
-        </div>
+<!-- ================= NAVBAR ================= -->
 
-        <div class="nav-links">
-            <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('hospitals_page') }}">Hospitals</a>
-            <a href="{{ url_for('medicines_page') }}">Medicines</a>
-            <a href="{{ url_for('inventory_page') }}">Inventory</a>
-            <a href="{{ url_for('requirements_page') }}">Requirements</a>
-            <a href="{{ url_for('transfers_page') }}">Transfers</a>
-        </div>
+<nav class="navbar">
 
-    </nav>
+    <div class="logo">
+        💊 MedStock
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('hospitals_page') }}">
+            Hospitals
+        </a>
+
+        <a href="{{ url_for('medicines_page') }}">
+            Medicines
+        </a>
+
+        <a href="{{ url_for('inventory_page') }}">
+            Inventory
+        </a>
+
+        <a href="{{ url_for('requirements_page') }}">
+            Requirements
+        </a>
+
+        <a href="{{ url_for('transfers_page') }}">
+            Transfers
+        </a>
+
+    </div>
+
+</nav>
 
 
-    <main class="container">
+<!-- ================= MAIN ================= -->
 
-        <div class="page-header">
-
-            <div>
-                <h1>Medicine Inventory Dashboard</h1>
-
-                <p>
-                    Monitor medicine availability, expiry dates and hospital requirements.
-                </p>
-            </div>
-
-        </div>
+<main class="container">
 
 
-        <!-- STATISTICS -->
+    <!-- HERO -->
 
-        <section class="stats-grid">
+    <section class="page-header">
 
-            <div class="stat-card">
+        <h1>
+            💊 Medicine Inventory Dashboard
+        </h1>
+
+        <p>
+            Government Hospital Medicine Inventory &
+            Supply Chain Management
+        </p>
+
+    </section>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <section class="section">
+
+        <div class="stats-grid">
+
+
+            <!-- HOSPITALS -->
+
+            <div class="stat-card blue-card">
 
                 <div class="stat-icon">
                     🏥
                 </div>
 
                 <div>
-                    <h3>{{ hospitals }}</h3>
-                    <p>Hospitals</p>
+
+                    <p>
+                        TOTAL HOSPITALS
+                    </p>
+
+                    <h2>
+                        {{ hospital_count }}
+                    </h2>
+
+                    <span>
+                        Hospitals in network
+                    </span>
+
                 </div>
 
             </div>
 
 
-            <div class="stat-card">
+            <!-- MEDICINES -->
+
+            <div class="stat-card purple-card">
 
                 <div class="stat-icon">
                     💊
                 </div>
 
                 <div>
-                    <h3>{{ medicines }}</h3>
-                    <p>Medicines</p>
+
+                    <p>
+                        TOTAL MEDICINES
+                    </p>
+
+                    <h2>
+                        {{ medicine_count }}
+                    </h2>
+
+                    <span>
+                        Medicines registered
+                    </span>
+
                 </div>
 
             </div>
 
 
-            <div class="stat-card danger">
+            <!-- LOW STOCK -->
+
+            <div class="stat-card red-card">
 
                 <div class="stat-icon">
                     🔴
                 </div>
 
                 <div>
-                    <h3>{{ low_stock }}</h3>
-                    <p>Low Stock Items</p>
-                </div>
-
-            </div>
-
-
-            <div class="stat-card warning">
-
-                <div class="stat-icon">
-                    ⚠️
-                </div>
-
-                <div>
-                    <h3>{{ near_expiry }}</h3>
-                    <p>Near Expiry</p>
-                </div>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    📋
-                </div>
-
-                <div>
-                    <h3>{{ requirements }}</h3>
-                    <p>Requirements</p>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ALERTS -->
-
-        <section class="section">
-
-            <div class="section-title">
-
-                <div>
-                    <h2>Inventory Alerts</h2>
 
                     <p>
-                        Important items that need attention.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="alert-grid">
-
-                {% if low_stock > 0 %}
-
-                <div class="alert-card danger-alert">
-
-                    <div class="alert-icon">
-                        🔴
-                    </div>
-
-                    <div>
-
-                        <h3>Low Stock Alert</h3>
-
-                        <p>
-                            {{ low_stock }}
-                            inventory item(s) are below their minimum stock level.
-                        </p>
-
-                        <a href="{{ url_for('inventory_page') }}"
-                           class="alert-link">
-                            View Inventory →
-                        </a>
-
-                    </div>
-
-                </div>
-
-                {% else %}
-
-                <div class="alert-card success-alert">
-
-                    <div class="alert-icon">
-                        ✅
-                    </div>
-
-                    <div>
-
-                        <h3>Stock Levels Healthy</h3>
-
-                        <p>
-                            No medicines are currently below the minimum stock level.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                {% endif %}
-
-
-                {% if near_expiry > 0 %}
-
-                <div class="alert-card warning-alert">
-
-                    <div class="alert-icon">
-                        ⚠️
-                    </div>
-
-                    <div>
-
-                        <h3>Expiry Alert</h3>
-
-                        <p>
-                            {{ near_expiry }}
-                            medicine(s) are approaching their expiry date.
-                        </p>
-
-                        <a href="{{ url_for('medicines_page') }}"
-                           class="alert-link">
-                            View Medicines →
-                        </a>
-
-                    </div>
-
-                </div>
-
-                {% else %}
-
-                <div class="alert-card success-alert">
-
-                    <div class="alert-icon">
-                        ✅
-                    </div>
-
-                    <div>
-
-                        <h3>No Immediate Expiry Risk</h3>
-
-                        <p>
-                            No medicines are approaching expiry within the alert period.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                {% endif %}
-
-            </div>
-
-        </section>
-
-
-        <!-- TRANSFER SUGGESTIONS -->
-
-        <section class="section">
-
-            <div class="section-title">
-
-                <div>
-
-                    <h2>🔄 Smart Transfer Suggestions</h2>
-
-                    <p>
-                        The system identifies hospitals with excess stock
-                        and hospitals experiencing shortages.
+                        LOW STOCK
                     </p>
 
-                </div>
+                    <h2>
+                        {{ low_stock_count }}
+                    </h2>
 
-                <a href="{{ url_for('transfers_page') }}"
-                   class="button">
-                    View Transfers
-                </a>
+                    <span>
+                        Require attention
+                    </span>
+
+                </div>
 
             </div>
 
 
-            {% if suggestions %}
+        </div>
 
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Medicine</th>
-                            <th>From Hospital</th>
-                            <th>To Hospital</th>
-                            <th>Suggested Quantity</th>
-                            <th>Reason</th>
-                        </tr>
-
-                    </thead>
+    </section>
 
 
-                    <tbody>
+    <!-- ================= MEDICINE ALERTS ================= -->
 
-                        {% for suggestion in suggestions %}
+    <section class="section">
 
-                        <tr>
+        <div class="section-title">
 
-                            <td>
-                                <strong>
-                                    {{ suggestion.medicine_name }}
-                                </strong>
-                            </td>
+            <div>
 
-                            <td>
-                                {{ suggestion.from_hospital }}
-                            </td>
-
-                            <td>
-                                {{ suggestion.to_hospital }}
-                            </td>
-
-                            <td>
-
-                                <span class="quantity-badge">
-                                    {{ suggestion.quantity }}
-                                </span>
-
-                            </td>
-
-                            <td>
-
-                                <span class="status-badge warning">
-                                    Shortage detected
-                                </span>
-
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            {% else %}
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    ✅
-                </div>
-
-                <h3>No Transfer Suggestions</h3>
+                <h2>
+                    🚨 Medicine Alerts
+                </h2>
 
                 <p>
-                    There are currently no matching shortages and excess
-                    inventory situations.
+                    Important inventory conditions requiring attention.
                 </p>
 
             </div>
 
-            {% endif %}
-
-        </section>
+        </div>
 
 
-        <!-- RECENT TRANSFERS -->
+        <div class="alert-grid">
 
-        <section class="section">
 
-            <div class="section-title">
+            <!-- LOW STOCK -->
 
-                <div>
+            <div class="form-card">
 
-                    <h2>Recent Transfers</h2>
+                <h2>
+                    🔴 Low Stock Medicines
+                </h2>
+
+                <p style="color:#7c899d; margin-bottom:15px;">
+                    Medicines below their minimum stock level.
+                </p>
+
+
+                {% if low_stock_items %}
+
+                    {% for item in low_stock_items %}
+
+                        <div class="alert-card danger-alert"
+                             style="margin-bottom:10px;">
+
+                            <div class="alert-icon">
+                                💊
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    {{ item["medicine_name"] }}
+                                </h3>
+
+                                <p>
+                                    {{ item["hospital_name"] }}
+                                </p>
+
+                                <p>
+
+                                    Current stock:
+
+                                    <strong>
+                                        {{ item["stock_quantity"] }}
+                                    </strong>
+
+                                    units
+
+                                    · Minimum:
+
+                                    <strong>
+                                        {{ item["minimum_stock"] }}
+                                    </strong>
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            ✅
+                        </div>
+
+                        <h3>
+                            No Low Stock Alerts
+                        </h3>
+
+                        <p>
+                            Current stock levels are healthy.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- EXPIRY -->
+
+            <div class="form-card">
+
+                <h2>
+                    ⚠️ Near Expiry Medicines
+                </h2>
+
+                <p style="color:#7c899d; margin-bottom:15px;">
+                    Medicines approaching their expiry date.
+                </p>
+
+
+                {% if near_expiry_items %}
+
+                    {% for item in near_expiry_items %}
+
+                        <div class="alert-card warning-alert"
+                             style="margin-bottom:10px;">
+
+                            <div class="alert-icon">
+                                ⏳
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    {{ item["medicine_name"] }}
+                                </h3>
+
+                                <p>
+                                    {{ item["hospital_name"] }}
+                                </p>
+
+                                <p>
+
+                                    Expires in
+
+                                    <strong>
+                                        {{ item["days_remaining"] }}
+                                    </strong>
+
+                                    days.
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-icon">
+                            ✅
+                        </div>
+
+                        <h3>
+                            No Expiry Alerts
+                        </h3>
+
+                        <p>
+                            No medicines are currently near expiry.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= TRANSFER RECOMMENDATIONS ================= -->
+
+    <section class="section">
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    🔄 Smart Transfer Recommendations
+                </h2>
+
+                <p>
+                    MedStock identifies hospitals that can share excess medicines.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-card">
+
+
+            {% if transfer_recommendations %}
+
+
+                {% for recommendation in transfer_recommendations %}
+
+
+                    <div class="alert-card success-alert"
+                         style="margin-bottom:15px;">
+
+                        <div class="alert-icon">
+                            🔄
+                        </div>
+
+                        <div style="flex:1;">
+
+                            <h3>
+                                {{ recommendation["medicine_name"] }}
+                            </h3>
+
+                            <p>
+
+                                Transfer
+
+                                <strong>
+                                    {{ recommendation["quantity"] }}
+                                </strong>
+
+                                units from
+
+                                <strong>
+                                    {{ recommendation["from_hospital"] }}
+                                </strong>
+
+                                →
+
+                                <strong>
+                                    {{ recommendation["to_hospital"] }}
+                                </strong>
+
+                            </p>
+
+
+                            <a
+                                href="{{ url_for('transfers_page') }}"
+                                class="button"
+                                style="margin-top:10px;"
+                            >
+                                🔄 Manage Transfer
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+                {% endfor %}
+
+
+            {% else %}
+
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        ✅
+                    </div>
+
+                    <h3>
+                        No Transfer Recommendations
+                    </h3>
 
                     <p>
-                        Latest medicine distribution activity.
+                        There are currently no matching shortages
+                        and excess stock situations.
                     </p>
 
                 </div>
 
-            </div>
+
+            {% endif %}
 
 
-            {% if recent_transfers %}
+        </div>
 
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Medicine</th>
-                            <th>From</th>
-                            <th>To</th>
-                            <th>Quantity</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                        </tr>
-
-                    </thead>
+    </section>
 
 
-                    <tbody>
+    <!-- ================= QUICK ACTIONS ================= -->
 
-                        {% for transfer in recent_transfers %}
+    <section class="section">
 
-                        <tr>
+        <div class="section-title">
 
-                            <td>
-                                {{ transfer.medicine_name }}
-                            </td>
+            <div>
 
-                            <td>
-                                {{ transfer.from_hospital }}
-                            </td>
+                <h2>
+                    ⚡ Quick Actions
+                </h2>
 
-                            <td>
-                                {{ transfer.to_hospital }}
-                            </td>
-
-                            <td>
-                                {{ transfer.quantity }}
-                            </td>
-
-                            <td>
-
-                                <span class="status-badge success">
-                                    {{ transfer.status }}
-                                </span>
-
-                            </td>
-
-                            <td>
-                                {{ transfer.transfer_date }}
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
+                <p>
+                    Manage your medicine network quickly.
+                </p>
 
             </div>
 
-            {% else %}
+        </div>
 
-            <div class="empty-state">
 
-                <div class="empty-icon">
+        <div class="quick-grid">
+
+
+            <a
+                href="{{ url_for('hospitals_page') }}"
+                class="quick-card"
+            >
+
+                <div>
+                    🏥
+                </div>
+
+                <section>
+
+                    <strong>
+                        Hospitals
+                    </strong>
+
+                    <small>
+                        Manage hospitals
+                    </small>
+
+                </section>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('medicines_page') }}"
+                class="quick-card"
+            >
+
+                <div>
+                    💊
+                </div>
+
+                <section>
+
+                    <strong>
+                        Medicines
+                    </strong>
+
+                    <small>
+                        Manage medicines
+                    </small>
+
+                </section>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('inventory_page') }}"
+                class="quick-card"
+            >
+
+                <div>
                     📦
                 </div>
 
-                <h3>No Transfers Yet</h3>
+                <section>
 
-                <p>
-                    Completed medicine transfers will appear here.
-                </p>
+                    <strong>
+                        Inventory
+                    </strong>
 
-            </div>
+                    <small>
+                        Manage stock
+                    </small>
 
-            {% endif %}
+                </section>
 
-        </section>
+            </a>
 
 
-        <!-- QUICK ACTIONS -->
-
-        <section class="section">
-
-            <div class="section-title">
+            <a
+                href="{{ url_for('requirements_page') }}"
+                class="quick-card"
+            >
 
                 <div>
-
-                    <h2>Quick Actions</h2>
-
-                    <p>
-                        Manage the medicine supply chain.
-                    </p>
-
+                    📋
                 </div>
 
-            </div>
+                <section>
+
+                    <strong>
+                        Requirements
+                    </strong>
+
+                    <small>
+                        Hospital requirements
+                    </small>
+
+                </section>
+
+            </a>
 
 
-            <div class="quick-actions">
+            <a
+                href="{{ url_for('transfers_page') }}"
+                class="quick-card"
+            >
 
-                <a href="{{ url_for('hospitals_page') }}"
-                   class="quick-action">
+                <div>
+                    🔄
+                </div>
 
-                    <span>🏥</span>
+                <section>
 
-                    <div>
-                        <strong>Manage Hospitals</strong>
-                        <small>Add and view hospitals</small>
-                    </div>
+                    <strong>
+                        Transfers
+                    </strong>
 
-                </a>
+                    <small>
+                        Redistribute medicines
+                    </small>
 
+                </section>
 
-                <a href="{{ url_for('medicines_page') }}"
-                   class="quick-action">
-
-                    <span>💊</span>
-
-                    <div>
-                        <strong>Manage Medicines</strong>
-                        <small>Add medicines and expiry dates</small>
-                    </div>
-
-                </a>
+            </a>
 
 
-                <a href="{{ url_for('inventory_page') }}"
-                   class="quick-action">
+        </div>
 
-                    <span>📦</span>
-
-                    <div>
-                        <strong>Manage Inventory</strong>
-                        <small>Track hospital stock</small>
-                    </div>
-
-                </a>
+    </section>
 
 
-                <a href="{{ url_for('requirements_page') }}"
-                   class="quick-action">
-
-                    <span>📋</span>
-
-                    <div>
-                        <strong>Add Requirements</strong>
-                        <small>Record hospital medicine needs</small>
-                    </div>
-
-                </a>
+</main>
 
 
-                <a href="{{ url_for('transfers_page') }}"
-                   class="quick-action">
+<!-- ================= FOOTER ================= -->
 
-                    <span>🔄</span>
+<footer>
 
-                    <div>
-                        <strong>Manage Transfers</strong>
-                        <small>Move medicines between hospitals</small>
-                    </div>
+    <p>
+        <strong>💊 MedStock</strong>
+    </p>
 
-                </a>
+    <p>
+        Medicine Inventory & Supply Chain Management · SIH1627
+    </p>
 
-            </div>
-
-        </section>
-
-    </main>
+</footer>
 
 
-    <footer>
+<script
+    src="{{ url_for('static', filename='js/script.js') }}">
+</script>
 
-        <p>
-            MedStock — Medicine Inventory & Supply Chain Management
-        </p>
-
-        <p>
-            SIH1627 Project
-        </p>
-
-    </footer>
-
-
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
+
 </html>
